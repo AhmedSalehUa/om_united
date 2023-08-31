@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "612794064156",
+    "project_id": "omuited",
+    "storage_bucket": "omuited.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:612794064156:android:273865845a11a8567f6ed9",
+        "android_client_info": {
+          "package_name": "com.saleh.om_united"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "612794064156-oarau95gairfqn3kkqkt46c271i7hta6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBz-eOfucwHZZtN_v8hQfxsvQ3d1shH6tY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "612794064156-oarau95gairfqn3kkqkt46c271i7hta6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
