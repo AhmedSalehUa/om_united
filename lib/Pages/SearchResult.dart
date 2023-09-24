@@ -66,7 +66,7 @@ class _SearchResultContent extends State<SearchResultContent> {
       }
       return items;
     } catch (e) {
-      print("excep ${e}");
+      // print("excep ${e}");
       throw Exception('Failed to fetch data: $e');
     }
   }

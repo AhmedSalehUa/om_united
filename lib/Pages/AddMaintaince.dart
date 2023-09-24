@@ -206,7 +206,7 @@ class _AddMaintainceFormState extends State<AddMaintainceForm> {
                         ),
                         MultipleImageDragged(
                           text: 'صورة أو فيديو',
-                          url: "",
+                          url: [],
                           photos: setMaintainceImages,
                         ),
                         const SizedBox(

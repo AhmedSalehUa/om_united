@@ -108,7 +108,7 @@ class _DetailsState extends State<Details> {
         flex: kIsWeb ? 2 : 1,
         child: Container(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Align(
                 alignment: AlignmentDirectional.topEnd,
@@ -160,6 +160,28 @@ class _DetailsState extends State<Details> {
                   ),
                 ),
               ),
+              Align(
+                alignment: AlignmentDirectional.topEnd,
+                child: Container(
+                  width: 230,
+                  decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      side:
+                      const BorderSide(width: 2, color: Color(0x14344054)),
+                      borderRadius: BorderRadius.circular(21),
+                    ),
+                  ),
+                  padding: EdgeInsets.all(15),
+                  child: Text( "اجمالي تكلفة الصيانة : " + widget.item.total_maintance_cost.toString() , textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      color: Color(0xFF475467),
+                      fontSize: 14,
+                      fontFamily: 'santo',
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.10,
+                    ),),
+                ),
+              ),
               const SizedBox(
                 height: 15,
               ),
@@ -177,18 +199,20 @@ class _DetailsState extends State<Details> {
                   : const SizedBox(
                       height: 10,
                     ),
-              getMachineStatus(widget.item.lastMaintaince!,widget.item.maintainceEvery),
-
+              getMachineStatus(
+                  widget.item.lastMaintaince!, widget.item.maintainceEvery),
             ],
           ),
         ),
       ),
+      SizedBox(
+        width: 20,
+      ),
       Expanded(
         flex: kIsWeb ? 1 : 0,
         child: Stack(
-          children: [
-            Container(
-              height: 380,
+          children: [ Container(
+              height: 380,width: MediaQuery.of(context).size.width,
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(width: 0.50, color: Color(0xFFD0D5DD)),
@@ -196,12 +220,11 @@ class _DetailsState extends State<Details> {
                 ),
               ),
               padding: EdgeInsets.all(10),
-              child:
-              CachedNetworkImage(
-              imageUrl: widget.item.imageUrl ??
-    "https://media.istockphoto.com/id/182192586/photo/portable-electric-generator.jpg?s=612x612&w=0&k=20&c=xQzHBE_g29RdGV-AZbqek0JQzHifxOD-z3lExi1MfDs=",
-    fit: BoxFit.fill,
-    ) ,
+              child: CachedNetworkImage(
+                imageUrl: widget.item.imageUrl ??
+                    "https://media.istockphoto.com/id/182192586/photo/portable-electric-generator.jpg?s=612x612&w=0&k=20&c=xQzHBE_g29RdGV-AZbqek0JQzHifxOD-z3lExi1MfDs=",
+                fit: BoxFit.fill,
+              ),
             ),
             Align(
               alignment: AlignmentDirectional.topEnd,
@@ -214,7 +237,7 @@ class _DetailsState extends State<Details> {
                       borderRadius: BorderRadius.circular(4)),
                 ),
                 child: Text(
-                  "#${widget.item.id.toString()}",
+                  "#${widget.item.serial.toString()}",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -284,7 +307,7 @@ class _DetailsState extends State<Details> {
                                       children: detailsContent,
                                     ),
                             ),
-                             const Align(
+                            mainainces.length>0 ?const Align(
                               alignment: AlignmentDirectional.topEnd,
                               child: Text(
                                 'تاريخ الصيانة',
@@ -297,9 +320,12 @@ class _DetailsState extends State<Details> {
                                   letterSpacing: 0.15,
                                 ),
                               ),
-                            ),
-                            Column(
-                              children: mainainces,
+                            ):SizedBox(),
+                            Expanded(
+                              flex: kIsWeb?1:0,
+                              child: Column(
+                                children: mainainces,
+                              ),
                             )
                           ],
                         ),
@@ -331,8 +357,9 @@ class _SubHeaderState extends State<SubHeader> {
   @override
   Widget build(BuildContext context) {
     return Container(
-
-      padding:kIsWeb ? const EdgeInsets.all(15): const EdgeInsets.fromLTRB(15, 50, 15, 15),
+      padding: kIsWeb
+          ? const EdgeInsets.all(15)
+          : const EdgeInsets.fromLTRB(15, 50, 15, 15),
       child: Stack(
         children: [
           Row(
@@ -396,8 +423,10 @@ class _SubHeaderState extends State<SubHeader> {
                           description: "لن تستطيع اعادته مرة أخرى",
                           onConfirm: () {
                             widget.Delete();
-                            Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (context) => InventoryPage()));
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => InventoryPage()));
                           },
                         );
                       },

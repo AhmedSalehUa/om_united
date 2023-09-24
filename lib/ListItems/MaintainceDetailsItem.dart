@@ -46,7 +46,7 @@ class _MaintainceDetailsItemState extends State<MaintainceDetailsItem> {
       final List<MaintainceComment> maintainceComments = [];
 
       for (var itemJson in jsonData['Maintainces']) {
-        print(itemJson);
+        // print(itemJson);
         final item = MaintainceComment.fromJson(itemJson);
         maintainceComments.add(item);
       }

@@ -10,11 +10,17 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:om_united/Components/DatePicker.dart';
 import 'package:om_united/Components/ImageDragged.dart';
 import 'package:om_united/Components/Widgets.dart';
+import 'package:om_united/ListItems/MachineCategoryItem.dart';
+import 'package:om_united/Pages/AddMachineCategory.dart';
 import 'package:om_united/Pages/InventoryPage.dart';
 import 'package:om_united/utilis/Utilis.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/Header.dart';
+import '../Components/MultipleImageDragged.dart';
+import '../ListItems/ClientDropDown.dart';
+import '../Model/MachineCategories.dart';
+import 'AddClientTemp.dart';
 import 'MiniFragmnet.dart';
 import 'package:http/http.dart' as http;
 
@@ -43,22 +49,24 @@ class AddMachineForm extends StatefulWidget {
 
 class _AddMachineFormState extends State<AddMachineForm> {
   String? selectedValue;
+  String? selectedCategory;
+  String? selectedClient;
   bool isActive = false;
 
   PlatformFile? _machinePhotos;
-  PlatformFile? _contractPhotos;
-   TextEditingController _nameTextController = TextEditingController();
+
+  List<PlatformFile>? _contractPhotos;
+
+  TextEditingController _nameTextController = TextEditingController();
   TextEditingController _codeTextController = TextEditingController();
   TextEditingController _brandTextController = TextEditingController();
+  TextEditingController _maintanceEverTextController = TextEditingController();
+  TextEditingController _totalMaintanceCostTextController =
+      TextEditingController();
 
-   TextEditingController _clientNameTextController = TextEditingController();
   TextEditingController _dateOfContractTextController = TextEditingController();
   TextEditingController _dateRangTextController = TextEditingController();
-  TextEditingController _phoneTextController = TextEditingController();
-  TextEditingController _nationalIdTextController = TextEditingController();
-  TextEditingController _guardNumTextController = TextEditingController();
-  TextEditingController _maintanceEverTextController = TextEditingController();
-  TextEditingController _addressTextController = TextEditingController();
+  TextEditingController _notesTextController = TextEditingController();
 
   void setMachineImage(PlatformFile machinePhotos) {
     setState(() {
@@ -66,10 +74,8 @@ class _AddMachineFormState extends State<AddMachineForm> {
     });
   }
 
-  void setContractImage(PlatformFile contractPhotos) {
-    setState(() {
-      _contractPhotos = contractPhotos;
-    });
+  void setContractImage(List<PlatformFile> imgs) {
+    _contractPhotos = imgs;
   }
 
   int getStatusID(String value) {
@@ -88,119 +94,184 @@ class _AddMachineFormState extends State<AddMachineForm> {
   late String progress = "";
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    List<Widget> catRow = [
+      subHeaderButton( '', PhosphorIcons.plus_circle, () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const AddMachineCategory()));
+      }),
+      Row(
+        children: [
+          MachineCategoryItem(
+            onChange: (value) {
+              setState(() {
+                selectedCategory = value.toString();
+              });
+            },
+            onSave: (value) {
+              setState(() {
+                selectedCategory = value.toString();
+              });
+            },
+            initialValue: "",
+          ),
+          kIsWeb
+              ? Text(
+                  "الفئة",
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A24),
+                    fontSize: 14,
+                    fontFamily: 'santo',
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.10,
+                  ),
+                )
+              : SizedBox(),
+        ],
+      ),
+    ];
     Future<void> Submit() async {
-      context.loaderOverlay.show();
+      if (_nameTextController.text != "" &&
+          selectedValue != "" &&
+          selectedCategory != "") {
+        context.loaderOverlay.show();
 
-
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var request = http.MultipartRequest(
-        "POST",
-        Uri.parse("${URL_PROVIDER()}/Machines.php"),
-      );
-      if (kIsWeb) {
-        if (selectedValue == "3") {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        var request = http.MultipartRequest(
+          "POST",
+          Uri.parse("${URL_PROVIDER()}/Machines.php"),
+        );
+        if (kIsWeb) {
+          if (selectedValue == "3") {
+            if (_contractPhotos != null) {
+              for (var i = 0; i < _contractPhotos!.length; i++) {
+                request.files.add(
+                  http.MultipartFile.fromBytes(
+                    "rent_file$i",
+                    _contractPhotos![i].bytes!,
+                    filename: _contractPhotos![i].name,
+                  ),
+                );
+              }
+            }
+          }
           request.files.add(
             http.MultipartFile.fromBytes(
-              "rent_file",
-              _contractPhotos!.bytes!,
-              filename: _contractPhotos!.name,
+              "file",
+              _machinePhotos!.bytes!,
+              filename: _machinePhotos!.name,
             ),
           );
-        }
-        request.files.add(
-          http.MultipartFile.fromBytes(
-            "file",
-            _machinePhotos!.bytes!,
-            filename: _machinePhotos!.name,
-          ),
-        );
-      } else {
-        if (selectedValue == "3") {
+        } else {
+          if (selectedValue == "3") {
+            if (_contractPhotos != null) {
+              for (var i = 0; i < _contractPhotos!.length; i++) {
+                request.files.add(
+                  await http.MultipartFile.fromPath(
+                    "rent_file$i",
+                    _contractPhotos![i].path!,
+                    filename: basename(_contractPhotos![i].path!),
+                  ),
+                );
+              }
+            }
+          }
           request.files.add(
             await http.MultipartFile.fromPath(
-              "rent_file",
-              _contractPhotos!.path!,
-              filename: basename(_contractPhotos!.path!),
+              "file",
+              _machinePhotos!.path!,
+              filename: basename(_machinePhotos!.path!),
             ),
           );
         }
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            "file",
-            _machinePhotos!.path!,
-            filename: basename(_machinePhotos!.path!),
-          ),
-        );
-      }
 
-      if (selectedValue == "3") {
-        request.fields.addAll({
-          "name": _nameTextController.text  ,
-          "code": _codeTextController.text  ,
-          "brand": _brandTextController.text  ,
-          "status": selectedValue == null ? "1" : selectedValue!,
-          "rent_user_id": prefs.getInt("id").toString(),
-          "rent_name": _clientNameTextController.text,
-          "rent_date_from": _dateOfContractTextController.text,
-          "rent_date_to": _dateRangTextController.text,
-          "rent_phone": _phoneTextController.text,
-          "rent_national_id": _nationalIdTextController.text,
-          "rent_guard_phone": _guardNumTextController.text,
-          "rent_maintance_every": _maintanceEverTextController.text,
-          "rent_address": _addressTextController.text,
-        });
-      } else {
-        request.fields.addAll({
-          "name": _nameTextController.text  ,
-          "code": _codeTextController.text  ,
-          "brand": _brandTextController.text  ,
-          "status": selectedValue == null ? "1" : selectedValue!,
-          "rent_maintance_every": _maintanceEverTextController.text,
-        });
-      }
+        if (selectedValue == "3") {
+          request.fields.addAll({
+            "name": _nameTextController.text,
+            "code": _codeTextController.text,
+            "brand": _brandTextController.text,
+            "status": selectedValue == null ? "1" : selectedValue!,
+            "imageNum": _contractPhotos != null
+                ? _contractPhotos!.length.toString()
+                : "0",
+            "category": selectedCategory == null ? "1" : selectedCategory!,
+            "rent_maintance_every": _maintanceEverTextController.text,
+            "total_maintance_cost": _totalMaintanceCostTextController.text,
+            "rent_user_id": prefs.getInt("id").toString(),
+            "rent_date_from": _dateOfContractTextController.text,
+            "rent_date_to": _dateRangTextController.text,
+            "rent_notes": _notesTextController.text,
+            "rent_client_id": selectedClient == null ? "1" : selectedClient!,
+          });
+        } else {
+          request.fields.addAll({
+            "name": _nameTextController.text,
+            "code": _codeTextController.text,
+            "brand": _brandTextController.text,
+            "category": selectedCategory == null ? "1" : selectedCategory!,
+            "status": selectedValue == null ? "1" : selectedValue!,
+            "rent_maintance_every": _maintanceEverTextController.text,
+            "total_maintance_cost": _totalMaintanceCostTextController.text,
+          });
+        }
 
-      var response = await request.send();
+        var response = await request.send();
 
-      if (response.statusCode == 200) {
-        context.loaderOverlay.hide();
-        var responseOnce = await response.stream.bytesToString();
-        if(responseOnce.contains("Duplicate entry")) {
-          Fluttertoast.showToast(
-              msg: "المكينة موجودة بالفعل",
-              toastLength: Toast.LENGTH_LONG,
-              gravity: ToastGravity.TOP_RIGHT,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0);
-
-        }else{
-          var res = json.decode(responseOnce);
-          if (res["error"]) {
+        if (response.statusCode == 200) {
+          context.loaderOverlay.hide();
+          var responseOnce = await response.stream.bytesToString();
+          // print(responseOnce);
+          if (responseOnce.contains("Duplicate entry")) {
             Fluttertoast.showToast(
-                msg: res["message"],
+                msg: "المكينة موجودة بالفعل",
                 toastLength: Toast.LENGTH_LONG,
                 gravity: ToastGravity.TOP_RIGHT,
                 backgroundColor: Colors.red,
                 textColor: Colors.white,
                 fontSize: 16.0);
           } else {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => const InventoryPage()));
-            Fluttertoast.showToast(
-                msg: res["message"],
-                toastLength: Toast.LENGTH_LONG,
-                gravity: ToastGravity.TOP_RIGHT,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 16.0);
+            var res = json.decode(responseOnce);
+            if (res["error"]) {
+              Fluttertoast.showToast(
+                  msg: res["message"],
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.TOP_RIGHT,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+            } else {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const InventoryPage()));
+              Fluttertoast.showToast(
+                  msg: res["message"],
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.TOP_RIGHT,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+            }
           }
+        } else {
+          context.loaderOverlay.hide();
+
+          Fluttertoast.showToast(
+            msg: "NetworkError",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+          );
         }
       } else {
-        context.loaderOverlay.hide();
-
         Fluttertoast.showToast(
-          msg: "NetworkError",
+          msg: "بيانات فارغة",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
         );
@@ -209,7 +280,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
 
     List<Widget> content = [
       Expanded(
-        flex: kIsWeb?1:0,
+        flex: kIsWeb ? 1 : 0,
         child: Container(
           decoration: ShapeDecoration(
             color: Colors.white,
@@ -254,51 +325,48 @@ class _AddMachineFormState extends State<AddMachineForm> {
                             child: Column(
                               children: [
                                 Align(
-                                    alignment: AlignmentDirectional.center,
-                                    child: ImageDragged(
-                                        text: "صورة العقد",
-                                        url: "",
-                                        photo: setContractImage)),
+                                  alignment: AlignmentDirectional.center,
+                                  child: MultipleImageDragged(
+                                    text: 'صور أو فيديو',
+                                    url: [],
+                                    photos: setContractImage,
+                                  ),
+                                ),
                                 const SizedBox(
                                   height: 10,
                                 ),
-                                noIconedTextField(
-                                    'اسم المستأجر', _clientNameTextController,
-                                    onTextChange: (value) {}, height: 40),
+                                ClientDropDown(
+                                    onChange: (value) {
+                                      setState(() {
+                                        selectedClient = value.toString();
+                                      });
+                                    },
+                                    onSave: (value) {
+                                      setState(() {
+                                        selectedClient = value.toString();
+                                      });
+                                    },
+                                    initialValue: ""),
                                 const SizedBox(
                                   height: 10,
                                 ),
-                                DatePicker(label: "تاريخ التأجير",
+                                DatePicker(
+                                    label: "تاريخ التأجير",
                                     controller: _dateOfContractTextController),
                                 const SizedBox(
                                   height: 10,
-                                ),DatePicker(label: "تاريخ الانتهاء",
+                                ),
+                                DatePicker(
+                                    label: "تاريخ الانتهاء",
                                     controller: _dateRangTextController),
                                 const SizedBox(
                                   height: 10,
                                 ),
-                                noIconedTextField(
-                                    'رقم الهاتف', _phoneTextController,
-                                    onTextChange: (value) {}, height: 40),
-                                const SizedBox(
-                                  height: 10,
+                                noIconedTextArea(
+                                  'ملاحظات',
+                                  _notesTextController,
+                                  onTextChange: (value) {},
                                 ),
-                                noIconedTextField(
-                                    'رقم الهوية', _nationalIdTextController,
-                                    onTextChange: (value) {}, height: 40),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                noIconedTextField(
-                                    'رقم الحارس', _guardNumTextController,
-                                    onTextChange: (value) {}, height: 40),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-
-                                noIconedTextField(
-                                    'رابط العنوان', _addressTextController,
-                                    onTextChange: (value) {}, height: 40),
                               ],
                             ),
                           ),
@@ -309,13 +377,15 @@ class _AddMachineFormState extends State<AddMachineForm> {
           ),
         ),
       ),
-     kIsWeb? const SizedBox(
-       width: 24,
-     ): const SizedBox(
-    height: 24,
-    ),
+      kIsWeb
+          ? const SizedBox(
+              width: 24,
+            )
+          : const SizedBox(
+              height: 24,
+            ),
       Expanded(
-        flex: kIsWeb?3:0,
+        flex: kIsWeb ? 3 : 0,
         child: Container(
           decoration: ShapeDecoration(
             color: Colors.white,
@@ -343,7 +413,9 @@ class _AddMachineFormState extends State<AddMachineForm> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   SizedBox(
-                    width: kIsWeb? MediaQuery.of(context).size.width * 0.4 : MediaQuery.of(context).size.width*0.7,
+                    width: kIsWeb
+                        ? MediaQuery.of(context).size.width * 0.4
+                        : MediaQuery.of(context).size.width * 0.7,
                     child: Column(
                       children: [
                         const SizedBox(
@@ -387,10 +459,31 @@ class _AddMachineFormState extends State<AddMachineForm> {
                         const SizedBox(
                           height: 10,
                         ),
+                        kIsWeb
+                            ? Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: catRow,
+                              )
+                            : Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                verticalDirection: VerticalDirection.up,
+                                children: catRow,
+                              ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        splittedTextField('صـيـانـة المـولـد كـل',
+                            _maintanceEverTextController, 'يوم',
+                            height: 40),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         splittedTextField(
-                            'صيانة المولد كل',
-                            _maintanceEverTextController,
-                            'يوم',
+                            kIsWeb ? 'اجمالي صيانة المولد' : 'اجمالي الصيانات',
+                            _totalMaintanceCostTextController,
+                            'ريال',
                             height: 40),
                       ],
                     ),
@@ -433,14 +526,16 @@ class _AddMachineFormState extends State<AddMachineForm> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                   kIsWeb?  Row(
+                    kIsWeb
+                        ? Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: content,
-                          ):Column(verticalDirection: VerticalDirection.up,
-                     children: content,
-                   )
-                          ,
+                          )
+                        : Column(
+                            verticalDirection: VerticalDirection.up,
+                            children: content,
+                          ),
                   ],
                 ),
               ),
@@ -468,7 +563,9 @@ class _SubHeaderState extends State<SubHeader> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:kIsWeb ? const EdgeInsets.all(15): const EdgeInsets.fromLTRB(15, 50, 15, 15),
+      padding: kIsWeb
+          ? const EdgeInsets.all(15)
+          : const EdgeInsets.fromLTRB(15, 50, 15, 15),
       child: Stack(
         children: [
           Row(

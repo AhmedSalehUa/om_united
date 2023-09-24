@@ -34,7 +34,7 @@ class _DatePicker extends State<DatePicker> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: TextFormField(
-        controller: widget.controller,onTap: () {print("sss"); _selectDate(context);},
+        controller: widget.controller,onTap: () {  _selectDate(context);},
         textAlign: TextAlign.right,
         decoration: InputDecoration(
           suffixIcon: IconButton(

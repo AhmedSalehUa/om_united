@@ -1,4 +1,4 @@
- import 'dart:io';
+import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../Model/RentsAttachments.dart';
+
 class MultipleImageDragged extends StatefulWidget {
   final String text;
-  final String url;
+  final List<RentsAttachments> url;
   final Function(List<PlatformFile> imgs) photos;
 
   const MultipleImageDragged({
@@ -26,10 +28,8 @@ class MultipleImageDragged extends StatefulWidget {
 class _MultipleImageDraggedState extends State<MultipleImageDragged> {
   List<PlatformFile> _imageFiles = [];
 
-
   @override
   Widget build(BuildContext context) {
-
     Future<void> _pickImages() async {
       try {
         // Pick multiple image files using file_picker package
@@ -56,6 +56,7 @@ class _MultipleImageDraggedState extends State<MultipleImageDragged> {
         );
       }
     }
+
     return GestureDetector(
       onTap: _pickImages,
       child: DottedBorder(
@@ -97,8 +98,30 @@ class _MultipleImageDraggedState extends State<MultipleImageDragged> {
                           );
                   },
                 )
-              : widget.url != ""
-                  ? Image.network(widget.url)
+              : widget.url.length > 0
+                  ? ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: widget.url.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        RentsAttachments taregtFile = widget.url[index];
+                        return taregtFile.ext != "mp4"
+                            ? Image.network(
+                                taregtFile.photo,
+                                width: 300,
+                                height: 300,
+                                fit: BoxFit.cover,
+                              )
+                            : DottedBorder(
+                                child: Container(
+                                  width: 300,
+                                  height: 300,
+                                  child: Center(
+                                    child: Text("Video"),
+                                  ),
+                                ),
+                              );
+                      },
+                    )
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

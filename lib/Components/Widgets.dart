@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 
+import 'package:http/http.dart' as http;
 import '../ListItems/MachineItem.dart';
+import '../Model/MachineCategories.dart';
+import '../utilis/Utilis.dart';
 
 Image ImageWidget(String imageName, double width, double height) {
   return Image.asset(
@@ -19,13 +24,19 @@ Directionality noIconedTextArea(String text, TextEditingController controller,
   return Directionality(
     textDirection: TextDirection.rtl,
     child: Container(
-      child: TextFormField(controller: controller,onChanged: (value) {
-    onTextChange(value);
-  },
-        keyboardType: TextInputType.multiline,maxLines: null,minLines: 3,
+      child: TextFormField(
+        controller: controller,
+        onChanged: (value) {
+          onTextChange(value);
+        },
+        keyboardType: TextInputType.multiline,
+        maxLines: null,
+        minLines: 3,
         decoration: InputDecoration(
           labelText: text,
-          border: OutlineInputBorder( borderRadius: BorderRadius.circular(15.0),),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
         ),
       ),
     ),
@@ -36,14 +47,15 @@ Directionality noIconedTextField(String text, TextEditingController controller,
     {double height = 48, required Function onTextChange}) {
   return Directionality(
     textDirection: TextDirection.rtl,
-    child:TextFormField(controller: controller,
+    child: TextFormField(
+      controller: controller,
       decoration: InputDecoration(
         labelText: text,
-        border: OutlineInputBorder( borderRadius: BorderRadius.circular(15.0),),
-
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
       ),
     ),
-
   );
 }
 
@@ -53,7 +65,7 @@ Directionality splittedTextField(
   return Directionality(
       textDirection: TextDirection.rtl,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: kIsWeb ?MainAxisAlignment.start:MainAxisAlignment.spaceBetween,
         children: [
           Text(
             frist,
@@ -66,17 +78,22 @@ Directionality splittedTextField(
               letterSpacing: 0.10,
             ),
           ),
+          SizedBox(
+            width: 20,
+          ),
           Row(
             children: [
               SizedBox(
                 height: height,
                 width: 80,
-                child: TextFormField(controller: controller,
+                child: TextFormField(
+                  controller: controller,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder( borderRadius: BorderRadius.circular(15.0),),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
                   ),
                 ),
-
               ),
               const SizedBox(
                 width: 20,
@@ -153,7 +170,7 @@ Directionality IconedTextField(
 }
 
 Directionality IconedActionTextField(String text, IconData icon,
-    TextEditingController controller, Function onTap ) {
+    TextEditingController controller, Function onTap) {
   return Directionality(
       textDirection: TextDirection.rtl,
       child: TextFormField(
@@ -174,7 +191,7 @@ Directionality IconedActionTextField(String text, IconData icon,
           suffixIcon: IconButton(
             icon: Icon(
               icon,
-              color: Colors.blue  ,
+              color: Colors.blue,
             ),
             onPressed: () {
               onTap();
@@ -319,7 +336,6 @@ Container subHeaderButton(String text, IconData icon, Function onTap,
 
 Container subHeaderNoIconButton(String text, Function? onTap) {
   return Container(
-
     decoration: const BoxDecoration(
       boxShadow: [
         BoxShadow(
@@ -484,48 +500,3 @@ Align getStatusMenu(
     ),
   );
 }
-// TextFormField(
-//   controller: controller,
-//   onChanged: (value) {
-//     onTextChange(value);
-//   },
-//   obscureText: false,
-//   enableSuggestions: true,
-//   autocorrect: true,
-//   cursorColor: Color.fromRGBO(152, 162, 179, 1),
-//   textAlign: TextAlign.right,
-//   style: const TextStyle(
-//     color:  Colors.black ,
-//     fontSize: 16,
-//     fontFamily: 'santo',
-//     fontWeight: FontWeight.w400,
-//     letterSpacing: 0.50,
-//   ),
-//   decoration: InputDecoration(
-//     labelText: text,contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 15),
-//     labelStyle: const TextStyle(
-//         fontFamily: "santo",
-//         color: Color.fromRGBO(152, 162, 179, 1),
-//         fontWeight: FontWeight.w400,
-//         fontSize: 16
-//     ),
-//     filled: true,
-//     floatingLabelBehavior: FloatingLabelBehavior.never,
-//     fillColor: const Color.fromRGBO(249, 250, 251, 1),
-//     enabledBorder: OutlineInputBorder(
-//       borderRadius: BorderRadius.circular(15.0),
-//       borderSide: const BorderSide(
-//         width: 1.0,
-//         color: Color.fromRGBO(208, 213, 221, 1),
-//       ),
-//     ),
-//     focusedBorder: OutlineInputBorder(
-//       borderRadius: BorderRadius.circular(15.0),
-//       borderSide: const BorderSide(
-//         width: 1.0,
-//         color: Color.fromRGBO(208, 213, 221, 1),
-//       ),
-//     ),
-//   ),
-//   keyboardType: TextInputType.emailAddress,
-// ),

@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
 
       return prefs.getString('userName')!;
     } else {
-      print('Error loggin user');
+      // print('Error loggin user');
       return " ";
     }
   }

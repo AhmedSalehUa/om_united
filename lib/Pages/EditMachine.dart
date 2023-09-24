@@ -16,8 +16,12 @@ import 'package:om_united/Model/Rent.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/Header.dart';
+import '../Components/MultipleImageDragged.dart';
+import '../ListItems/ClientDropDown.dart';
+import '../ListItems/MachineCategoryItem.dart';
 import '../Model/Machine.dart';
 import '../utilis/Utilis.dart';
+import 'AddMachineCategory.dart';
 import 'InventoryPage.dart';
 import 'MiniFragmnet.dart';
 
@@ -54,29 +58,30 @@ class EditMachineForm extends StatefulWidget {
 
 class _EditMachineFormState extends State<EditMachineForm> {
   String? selectedValue;
+  String? selectedCategory;
+  String? selectedClient;
   bool isActive = false;
 
   PlatformFile? _machinePhotos;
-  PlatformFile? _contractPhotos;
+  List<PlatformFile>? _contractPhotos;
 
   TextEditingController _nameTextController = TextEditingController();
   TextEditingController _codeTextController = TextEditingController();
   TextEditingController _brandTextController = TextEditingController();
+  TextEditingController _maintanceEverTextController = TextEditingController();
+  TextEditingController _totalMaintanceCostTextController =
+      TextEditingController();
 
-  TextEditingController _clientNameTextController = TextEditingController();
   TextEditingController _dateOfContractTextController = TextEditingController();
   TextEditingController _dateRangTextController = TextEditingController();
-  TextEditingController _phoneTextController = TextEditingController();
-  TextEditingController _nationalIdTextController = TextEditingController();
-  TextEditingController _guardNumTextController = TextEditingController();
-  TextEditingController _maintanceEverTextController = TextEditingController();
-  TextEditingController _addressTextController = TextEditingController();
+  TextEditingController _notesTextController = TextEditingController();
 
   @override
   void initState() {
     setState(() {
       isActive = true;
       selectedValue = widget.item.status;
+      selectedCategory = widget.item.category.id.toString();
     });
     _nameTextController.value = TextEditingValue(text: widget.item.name);
     _codeTextController.value = TextEditingValue(
@@ -85,22 +90,19 @@ class _EditMachineFormState extends State<EditMachineForm> {
         text: widget.item.brand != null ? widget.item.brand! : "");
     _maintanceEverTextController.value =
         TextEditingValue(text: widget.item.maintainceEvery!);
+    _totalMaintanceCostTextController.value =
+        TextEditingValue(text: widget.item.total_maintance_cost!);
+
     if (widget.item.rent != null) {
-      _clientNameTextController.value =
-          TextEditingValue(text: widget.item.rent!.name);
       _dateOfContractTextController.value =
           TextEditingValue(text: widget.item.rent!.date);
       _dateRangTextController.value =
           TextEditingValue(text: widget.item.rent!.dateTo);
-      _phoneTextController.value =
-          TextEditingValue(text: widget.item.rent!.phone);
-      _nationalIdTextController.value =
-          TextEditingValue(text: widget.item.rent!.nationalId);
-      _guardNumTextController.value =
-          TextEditingValue(text: widget.item.rent!.guardPhone);
-
-      _addressTextController.value =
-          TextEditingValue(text: widget.item.rent!.location);
+      _notesTextController.value =
+          TextEditingValue(text: widget.item.rent!.notes!);
+      setState(() {
+        selectedClient = widget.item.rent!.client!.id.toString();
+      });
     }
     super.initState();
   }
@@ -111,22 +113,8 @@ class _EditMachineFormState extends State<EditMachineForm> {
     });
   }
 
-  void setContractImage(PlatformFile contractPhotos) {
-    setState(() {
-      _contractPhotos = contractPhotos;
-    });
-  }
-
-  int getStatusID(String value) {
-    switch (value) {
-      case "inventory":
-        return 1;
-      case "crashed":
-        return 2;
-      case "rents":
-        return 3;
-    }
-    return 1;
+  void setContractImage(List<PlatformFile> imgs) {
+    _contractPhotos = imgs;
   }
 
   late Response response;
@@ -134,346 +122,432 @@ class _EditMachineFormState extends State<EditMachineForm> {
 
   @override
   Widget build(BuildContext context) {
+    // print("idget.item!.rent!.attachments!.length>0");
+    // print(widget.item!.rent == null);
+    List<Widget> catRow = [
+      subHeaderButton('', PhosphorIcons.plus_circle, () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const AddMachineCategory()));
+      }),
+      Row(
+        children: [
+          MachineCategoryItem(
+              onChange: (value) {
+                setState(() {
+                  selectedCategory = value.toString();
+                });
+              },
+              onSave: (value) {
+                setState(() {
+                  selectedCategory = value.toString();
+                });
+              },
+              initialValue: selectedCategory == null ? "" : selectedCategory!),
+          kIsWeb
+              ? Text(
+                  "الفئة",
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A24),
+                    fontSize: 14,
+                    fontFamily: 'santo',
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.10,
+                  ),
+                )
+              : SizedBox(),
+        ],
+      ),
+    ];
     Future<void> Submit() async {
-      context.loaderOverlay.show();
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var request = http.MultipartRequest(
-        "POST",
-        Uri.parse("${URL_PROVIDER()}/Machines.php"),
-      );
-      if (kIsWeb) {
-        if (selectedValue == "3" && _contractPhotos != null) {
-          request.files.add(
-            http.MultipartFile.fromBytes(
-              "rent_file",
-              _contractPhotos!.bytes!,
-              filename: _contractPhotos!.name,
-            ),
-          );
-        }
-        if (_machinePhotos != null) {
-          request.files.add(
-            http.MultipartFile.fromBytes(
-              "file",
-              _machinePhotos!.bytes!,
-              filename: _machinePhotos!.name,
-            ),
-          );
-        }
-      } else {
-        if (selectedValue == "3") {
-          if (_contractPhotos != null) {
-          request.files.add(
-            await http.MultipartFile.fromPath(
-              "rent_file",
-              _contractPhotos!.path!,
-              filename: basename(_contractPhotos!.path!),
-            ),
-          );
-          } }
-        if (_machinePhotos != null) { request.files.add(
-          await http.MultipartFile.fromPath(
-            "file",
-            _machinePhotos!.path!,
-            filename: basename(_machinePhotos!.path!),
-          ),
-        );
-        } }
-
-      if (selectedValue == "3") {
-        request.fields.addAll({
-          "id": widget.item.id.toString(),
-          "name": _nameTextController.text ,
-          "code": _codeTextController.text  ,
-          "brand": _brandTextController.text ,
-          "status": selectedValue!,
-          "rent_user_id": prefs.getInt("id").toString(),
-          "rent_name": _clientNameTextController.text,
-          "rent_date_from": _dateOfContractTextController.text,
-          "rent_date_to": _dateRangTextController.text,
-          "rent_phone": _phoneTextController.text,
-          "rent_national_id": _nationalIdTextController.text,
-          "rent_guard_phone": _guardNumTextController.text,
-          "rent_maintance_every": _maintanceEverTextController.text,
-          "rent_address": _addressTextController.text,
-        });
-      } else {
-        request.fields.addAll({
-          "id": widget.item.id.toString(),
-          "name": _nameTextController.text  ,
-          "code": _codeTextController.text  ,
-          "brand": _brandTextController.text ,
-          "status": selectedValue!,
-          "rent_maintance_every": _maintanceEverTextController.text,
-        });
-      }
-      var response = await request.send();
-
-      if (response.statusCode == 200) {
-        context.loaderOverlay.hide();
-        var responseOnce = await response.stream.bytesToString();
-        if (responseOnce.contains("Duplicate entry")) {
+      if (_nameTextController.text != "" &&
+          _maintanceEverTextController.text != "" &&
+          selectedCategory != null) {
+        if (selectedValue == "3" && selectedClient == null) {
           Fluttertoast.showToast(
-              msg: "المكينة موجودة بالفعل",
-              toastLength: Toast.LENGTH_LONG,
-              gravity: ToastGravity.TOP_RIGHT,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0);
-        } else {
-          var res = json.decode(responseOnce);
-
-        if (res["error"]) {
-          Fluttertoast.showToast(
-              msg: res["message"],
-              toastLength: Toast.LENGTH_LONG,
-              gravity: ToastGravity.TOP_RIGHT,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0
+            msg: "بيانات فارغة",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
           );
         } else {
-          Navigator.pushReplacement(context, MaterialPageRoute(
-              builder: (context) => const InventoryPage()));
-          Fluttertoast.showToast(
-              msg: "تم التعديل",
-              toastLength: Toast.LENGTH_LONG,
-              gravity: ToastGravity.TOP_RIGHT,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0
+          context.loaderOverlay.show();
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          var request = http.MultipartRequest(
+            "POST",
+            Uri.parse("${URL_PROVIDER()}/Machines.php"),
           );
+          if (kIsWeb) {
+            if (selectedValue == "3") {
+              if (_contractPhotos != null) {
+                for (var i = 0; i < _contractPhotos!.length; i++) {
+                  request.files.add(
+                    http.MultipartFile.fromBytes(
+                      "rent_file$i",
+                      _contractPhotos![i].bytes!,
+                      filename: _contractPhotos![i].name,
+                    ),
+                  );
+                }
+              }
+            }
+            if (_machinePhotos != null) {
+              request.files.add(
+                http.MultipartFile.fromBytes(
+                  "file",
+                  _machinePhotos!.bytes!,
+                  filename: _machinePhotos!.name,
+                ),
+              );
+            }
+          } else {
+            if (selectedValue == "3") {
+              if (_contractPhotos != null) {
+                for (var i = 0; i < _contractPhotos!.length; i++) {
+                  request.files.add(
+                    await http.MultipartFile.fromPath(
+                      "rent_file$i",
+                      _contractPhotos![i].path!,
+                      filename: basename(_contractPhotos![i].path!),
+                    ),
+                  );
+                }
+              }
+            }
+            if (_machinePhotos != null) {
+              request.files.add(
+                await http.MultipartFile.fromPath(
+                  "file",
+                  _machinePhotos!.path!,
+                  filename: basename(_machinePhotos!.path!),
+                ),
+              );
+            }
+          }
+
+          if (selectedValue == "3") {
+            request.fields.addAll({
+              "id": widget.item.id.toString(),
+              "name": _nameTextController.text,
+              "code": _codeTextController.text,
+              "brand": _brandTextController.text,
+              "status": selectedValue == null ? "1" : selectedValue!,
+              "imageNum": _contractPhotos != null
+                  ? _contractPhotos!.length.toString()
+                  : "0",
+              "haveImages": widget.item!.rent != null
+                  ? widget.item!.rent!.attachments!.length.toString()
+                  : "0",
+              "category": selectedCategory == null ? "1" : selectedCategory!,
+              "rent_maintance_every": _maintanceEverTextController.text,
+              "total_maintance_cost": _totalMaintanceCostTextController.text,
+              "rent_user_id": prefs.getInt("id").toString(),
+              "rent_date_from": _dateOfContractTextController.text,
+              "rent_date_to": _dateRangTextController.text,
+              "rent_notes": _notesTextController.text,
+              "rent_client_id": selectedClient == null ? "1" : selectedClient!,
+            });
+          } else {
+            request.fields.addAll({
+              "id": widget.item.id.toString(),
+              "name": _nameTextController.text,
+              "code": _codeTextController.text,
+              "brand": _brandTextController.text,
+              "category": selectedCategory == null ? "1" : selectedCategory!,
+              "status": selectedValue == null ? "1" : selectedValue!,
+              "rent_maintance_every": _maintanceEverTextController.text,
+              "total_maintance_cost": _totalMaintanceCostTextController.text,
+            });
+          }
+          var response = await request.send();
+
+          if (response.statusCode == 200) {
+            context.loaderOverlay.hide();
+            var responseOnce = await response.stream.bytesToString();
+
+            if (responseOnce.contains("Duplicate entry")) {
+              context.loaderOverlay.hide();
+              Fluttertoast.showToast(
+                  msg: "المكينة موجودة بالفعل",
+                  toastLength: Toast.LENGTH_LONG,
+                  gravity: ToastGravity.TOP_RIGHT,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+            } else {
+              context.loaderOverlay.hide();
+              var res = json.decode(responseOnce);
+
+              if (res["error"]) {
+                context.loaderOverlay.hide();
+                Fluttertoast.showToast(
+                    msg: res["message"],
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP_RIGHT,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              } else {
+                context.loaderOverlay.hide();
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const InventoryPage()));
+                Fluttertoast.showToast(
+                    msg: "تم التعديل",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP_RIGHT,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              }
+            }
+          } else {
+            context.loaderOverlay.hide();
+            Fluttertoast.showToast(
+              msg: "NetworkError",
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.BOTTOM,
+            );
+          }
         }
-      }
       } else {
-        context.loaderOverlay.hide();
+        // print("object");
         Fluttertoast.showToast(
-          msg: "NetworkError",
+          msg: "بيانات فارغة",
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
         );
       }
     }
-List<Widget> content =[Expanded(
-  flex:  kIsWeb? 1:0,
-  child: Container(
-    decoration: ShapeDecoration(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        side: const BorderSide(
-            width: 0.50, color: Color(0x14344054)),
-        borderRadius: BorderRadius.circular(21),
-      ),
-    ),
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      children: [
-        const Align(
-          alignment: AlignmentDirectional.topEnd,
-          child: Text(
-            "الحالة",
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              color: Color(0xFF1A1A24),
-              fontSize: 16,
-              fontFamily: 'santo',
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.15,
+
+    List<Widget> content = [
+      Expanded(
+        flex: kIsWeb ? 1 : 0,
+        child: Container(
+          decoration: ShapeDecoration(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              side: const BorderSide(width: 0.50, color: Color(0x14344054)),
+              borderRadius: BorderRadius.circular(21),
             ),
           ),
-        ),
-        getStatusMenu((value) {
-          setState(() {
-            selectedValue = value.toString();
-          });
-        }, (value) {
-          selectedValue = value.toString();
-        }, selectedValue),
-        selectedValue != "3"
-            ? Text("")
-            : Column(
-          children: [
-            Align(
-              alignment:
-              AlignmentDirectional.topEnd,
-              child: SizedBox(
-                child: Column(
-                  children: [
-                    Align(
-                        alignment:
-                        AlignmentDirectional
-                            .center,
-                        child: ImageDragged(
-                            text: "صورة العقد",
-                            url: widget.item.rent !=
-                                null
-                                ? widget.item.rent!
-                                .imageUrl
-                                : "",
-                            photo:
-                            setContractImage)),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    noIconedTextField(
-                        'اسم المستأجر',
-                        _clientNameTextController,
-                        onTextChange: (value) {},
-                        height: 40),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    DatePicker(label: "تاريخ التأجير",
-                        controller: _dateOfContractTextController),
-                    const SizedBox(
-                      height: 10,
-                    ),DatePicker(label: "تاريخ الانتهاء",
-                        controller: _dateRangTextController),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    noIconedTextField('رقم الهاتف',
-                        _phoneTextController,
-                        onTextChange: (value) {},
-                        height: 40),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    noIconedTextField('رقم الهوية',
-                        _nationalIdTextController,
-                        onTextChange: (value) {},
-                        height: 40),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    noIconedTextField('رقم الحارس',
-                        _guardNumTextController,
-                        onTextChange: (value) {},
-                        height: 40),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    noIconedTextField(
-                        'رابط العنوان',
-                        _addressTextController,
-                        onTextChange: (value) {},
-                        height: 40),
-                  ],
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const Align(
+                alignment: AlignmentDirectional.topEnd,
+                child: Text(
+                  "الحالة",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: Color(0xFF1A1A24),
+                    fontSize: 16,
+                    fontFamily: 'santo',
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.15,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  ),
-),
-  kIsWeb? const SizedBox(
-    width: 24,
-  ):const SizedBox(
-    height: 24,
-  ),
-  Expanded(
-    flex: kIsWeb?  3:0,
-    child: Container(
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(
-              width: 0.50, color: Color(0x14344054)),
-          borderRadius: BorderRadius.circular(21),
+              getStatusMenu((value) {
+                setState(() {
+                  selectedValue = value.toString();
+                });
+              }, (value) {
+                selectedValue = value.toString();
+              }, selectedValue),
+              selectedValue != "3"
+                  ? Text("")
+                  : Column(
+                      children: [
+                        Align(
+                          alignment: AlignmentDirectional.topEnd,
+                          child: SizedBox(
+                            child: Column(
+                              children: [
+                                Align(
+                                  alignment: AlignmentDirectional.center,
+                                  child: MultipleImageDragged(
+                                    text: 'صور أو فيديو',
+                                    url: widget.item!.rent != null
+                                        ? widget.item!.rent!.attachments!
+                                        : [],
+                                    photos: setContractImage,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                ClientDropDown(
+                                  onChange: (value) {
+                                    setState(() {
+                                      selectedClient = value.toString();
+                                    });
+                                  },
+                                  onSave: (value) {
+                                    setState(() {
+                                      selectedClient = value.toString();
+                                    });
+                                  },
+                                  initialValue: selectedClient == null
+                                      ? ""
+                                      : selectedClient!,
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                DatePicker(
+                                    label: "تاريخ التأجير",
+                                    controller: _dateOfContractTextController),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                DatePicker(
+                                    label: "تاريخ الانتهاء",
+                                    controller: _dateRangTextController),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                noIconedTextArea(
+                                  'ملاحظات',
+                                  _notesTextController,
+                                  onTextChange: (value) {},
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ],
+          ),
         ),
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          const Text(
-            'البيانات الأساسية',
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              color: Color(0xFF1A1A24),
-              fontSize: 16,
-              fontFamily: 'santo',
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.15,
+      kIsWeb
+          ? const SizedBox(
+              width: 24,
+            )
+          : const SizedBox(
+              height: 24,
+            ),
+      Expanded(
+        flex: kIsWeb ? 3 : 0,
+        child: Container(
+          decoration: ShapeDecoration(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              side: const BorderSide(width: 0.50, color: Color(0x14344054)),
+              borderRadius: BorderRadius.circular(21),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              SizedBox(
-                width:
-                kIsWeb?  MediaQuery.of(context).size.width * 0.4: MediaQuery.of(context).size.width *0.7,
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    Align(
-                      alignment:
-                      AlignmentDirectional.topEnd,
-                      child: ImageDragged(
-                          text: "صورة الماكينة",
-                          url: widget.item.imageUrl!,
-                          photo: setMachineImage),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    noIconedTextArea(
-                      'اسم المنتج (إلزامي)',
-                      _nameTextController,
-                      onTextChange: (value) {
-                        if (_nameTextController.text !=
-                            "") {
-                          setState(() {
-                            isActive = true;
-                          });
-                        } else {
-                          setState(() {
-                            isActive = false;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    noIconedTextField('الرقم التعريفي',
-                        _codeTextController,
-                        onTextChange: (value) {}),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    noIconedTextField(
-                        'الماركة', _brandTextController,
-                        onTextChange: (value) {}),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    splittedTextField(
-                        'صيانة المولد كل',
-                        _maintanceEverTextController,
-                        'يوم',
-                        height: 40),
-                  ],
+              const Text(
+                'البيانات الأساسية',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  color: Color(0xFF1A1A24),
+                  fontSize: 16,
+                  fontFamily: 'santo',
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.15,
                 ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    width: kIsWeb
+                        ? MediaQuery.of(context).size.width * 0.4
+                        : MediaQuery.of(context).size.width * 0.7,
+                    child: Column(
+                      children: [
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.topEnd,
+                          child: ImageDragged(
+                              text: "صورة الماكينة",
+                              url: widget.item.imageUrl!,
+                              photo: setMachineImage),
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        noIconedTextArea(
+                          'اسم المنتج (إلزامي)',
+                          _nameTextController,
+                          onTextChange: (value) {
+                            if (_nameTextController.text != "") {
+                              setState(() {
+                                isActive = true;
+                              });
+                            } else {
+                              setState(() {
+                                isActive = false;
+                              });
+                            }
+                          },
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        noIconedTextField('الرقم التعريفي', _codeTextController,
+                            onTextChange: (value) {}),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        noIconedTextField('الماركة', _brandTextController,
+                            onTextChange: (value) {}),
+                        kIsWeb
+                            ? Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: catRow,
+                              )
+                            : Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                verticalDirection: VerticalDirection.up,
+                                children: catRow,
+                              ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        splittedTextField('صـيـانـة المـولـد كـل',
+                            _maintanceEverTextController, 'يوم',
+                            height: 40),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        splittedTextField(
+                            kIsWeb ? 'اجمالي صيانة المولد' : 'اجمالي الصيانات',
+                            _totalMaintanceCostTextController,
+                            'ريال',
+                            height: 40),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-    ),
-  )];
+        ),
+      )
+    ];
     return LoaderOverlay(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          kIsWeb ?  const Header(
-            isMain: false,
-          ):SizedBox() ,
+          kIsWeb
+              ? const Header(
+                  isMain: false,
+                )
+              : SizedBox(),
           SubHeader(
             isActive: isActive,
             Submit: Submit,
@@ -495,11 +569,15 @@ List<Widget> content =[Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                   kIsWeb? Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: content,
-                    ):Column(children: content,verticalDirection: VerticalDirection.up),
+                    kIsWeb
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: content,
+                          )
+                        : Column(
+                            children: content,
+                            verticalDirection: VerticalDirection.up),
                   ],
                 ),
               ),
@@ -527,8 +605,9 @@ class _SubHeaderState extends State<SubHeader> {
   @override
   Widget build(BuildContext context) {
     return Container(
-
-      padding:kIsWeb ? const EdgeInsets.all(15): const EdgeInsets.fromLTRB(15, 50, 15, 15),
+      padding: kIsWeb
+          ? const EdgeInsets.all(15)
+          : const EdgeInsets.fromLTRB(15, 50, 15, 15),
       child: Stack(
         children: [
           Row(
@@ -539,7 +618,7 @@ class _SubHeaderState extends State<SubHeader> {
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize:  kIsWeb ? 32 : 16,
+                  fontSize: kIsWeb ? 32 : 16,
                   fontFamily: 'santo',
                   fontWeight: FontWeight.w600,
                 ),

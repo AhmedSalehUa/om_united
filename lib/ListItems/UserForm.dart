@@ -139,7 +139,7 @@ class _UserFormState extends State<UserForm> {
 
         if (response.statusCode == 200) {
           var res = json.decode(await response.stream.bytesToString());
-          print(res);
+          // print(res);
           if (res["error"]) {
             setState(() {
               error = res["message"];
@@ -150,7 +150,7 @@ class _UserFormState extends State<UserForm> {
               FirebaseAuth.instance
                   .createUserWithEmailAndPassword(
                       email: _email.text, password: _pass.text)
-                  .then((value) => {print(value)});
+                  .then((value) => {/*print(value)*/});
             }
             Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => const HomePage()));

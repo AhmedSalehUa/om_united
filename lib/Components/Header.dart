@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:om_united/Components/Widgets.dart';
 import 'package:om_united/Model/User.dart';
+import 'package:om_united/Pages/ClientMachinesPage.dart';
 import 'package:om_united/Pages/HomePage.dart';
 import 'package:om_united/Pages/InventoryPage.dart';
 import 'package:om_united/Pages/SearchResult.dart';
@@ -161,7 +162,50 @@ String role = "";
             ],
           ),
           Row(
-            children: [
+            children: [role =="admin"? Directionality(
+              textDirection: TextDirection.rtl,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>   ClientMachinesPage()));
+                },
+                icon: Icon(
+                  PhosphorIcons.user_circle_bold,
+                  size: 24.0,
+                  color:  Color(0xFF98A1B2) ,
+                ),
+                label: Text(
+                  'العملاء',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color:   Color(0xFF98A1B2)  ,
+                    fontSize: 14,
+                    fontFamily: 'santo',
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.10,
+                  ),
+                ),
+                style: ButtonStyle(
+                  backgroundColor:
+                  MaterialStateProperty.all(Colors.transparent),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(73),
+                      side: BorderSide(
+                          color:   Colors.transparent
+                               ),
+                    ),
+                  ),
+                ),
+              ),
+            ):const SizedBox(
+              width: 10,
+            ),
+              const SizedBox(
+                width: 10,
+              ),
               role =="admin"? Directionality(
                 textDirection: TextDirection.rtl,
                 child: ElevatedButton.icon(

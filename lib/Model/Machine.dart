@@ -1,4 +1,4 @@
-
+import 'package:om_united/Model/MachineCategories.dart';
 import 'package:om_united/Model/Rent.dart';
 
 import 'Maintaince.dart';
@@ -7,9 +7,12 @@ class Machine {
   final int id;
   final String name;
   String? code;
-  String? brand;
+  String? brand;String? serial;
+
   final String status;
   String? lastMaintaince;
+  String? total_maintance_cost;
+  MachineCategories category;
   String? imageUrl;
   String? imageExt;
   final String maintainceEvery;
@@ -21,9 +24,12 @@ class Machine {
     required this.name,
     this.code,
     this.brand,
+    this.serial,
     required this.status,
+    required this.category,
     required this.maintainceEvery,
     this.lastMaintaince,
+    this.total_maintance_cost,
     this.imageUrl,
     this.imageExt,
     this.rent,
@@ -34,6 +40,7 @@ class Machine {
     Rent? rent;
     if (json['rents'] != false) {
       rent = Rent.fromJson(json['rents']);
+
     }
     List<Maintaince> maintaince = [];
     if (json['Maintainces'] != false) {
@@ -42,18 +49,19 @@ class Machine {
         maintaince.add(item);
       }
     }
+    MachineCategories  maintainceCat = MachineCategories.fromJson(json['categoryItem'][0]);
     return Machine(
         id: int.parse(json['id']),
         name: json['name'],
         status: json['status'],
+        category:maintainceCat ,
         maintainceEvery: json['maintance_every'],
         imageUrl: json['photo'],
-        lastMaintaince: json['last_maintaince'],
+        lastMaintaince: json['last_maintaince'],serial: json['serialName'], total_maintance_cost: json['total_maintance_cost'],
         code: json['code'],
         imageExt: json['photo_ext'],
         brand: json['brand'],
         mainainces: maintaince,
         rent: rent);
   }
-
 }

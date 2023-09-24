@@ -11,6 +11,8 @@ import 'package:om_united/Pages/NotificationsPage.dart';
 import 'package:om_united/Pages/SettingPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'ClientMachinesPage.dart';
+
 class MainFragmnet extends StatefulWidget {
   final Widget subHeader;
   final Widget content;
@@ -32,76 +34,101 @@ class MainFragmnet extends StatefulWidget {
 class _MainFragmnetState extends State<MainFragmnet> {
   String role = "";
 
-  Future<String> getRole()async{
-    final SharedPreferences prefs =
-    await SharedPreferences.getInstance();
+  Future<String> getRole() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('role')!;
   }
 
   @override
   void initState() {
     super.initState();
-    getRole().then((value)
-    {
-          setState(() {
-            role = value;
-          });
-          NavTabs.add(  GButton(
-            icon: PhosphorIcons.house_line,
-            text: 'الصفحة الرئيسية',
-            onPressed: () => {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HomePage()))
-            },
-          ));
-          value=="admin"? NavTabs.add(GButton(
-            icon: PhosphorIcons.package,
-            text: 'المخزون',
-            onPressed: () {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => InventoryPage()));
-            },
-          )):null;
-          NavTabs.add( GButton(
-            icon: PhosphorIcons.bell_simple,
-            text: 'الاشعارات',
-            onPressed: () {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => NotificationsPage()));
-            },
-          ));
-          NavTabs.add(GButton(
-            icon: PhosphorIcons.user,
-            text: 'حسابي',
-            onPressed: () async {
-              User user = await FromPrefs();
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          SettingPage(user: user)));
-            },
-          ));
-        });
-
+    getRole().then((value) {
+      setState(() {
+        role = value;
+      });
+      NavTabs.add(GButton(
+        icon: PhosphorIcons.house_line,
+        text: 'الصفحة الرئيسية',
+        onPressed: () => {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => HomePage()))
+        },
+      ));
+      value == "admin"
+          ? NavTabs.add(GButton(
+              icon: PhosphorIcons.package,
+              text: 'المخزون',
+              onPressed: () {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => InventoryPage()));
+              },
+            ))
+          : null;
+      value == "admin"
+          ? NavTabs.add(GButton(
+              icon: PhosphorIcons.user_circle_bold,
+              text: 'العملاء',
+              onPressed: () {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ClientMachinesPage()));
+              },
+            ))
+          : null;
+      NavTabs.add(GButton(
+        icon: PhosphorIcons.bell_simple,
+        text: 'الاشعارات',
+        onPressed: () {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => NotificationsPage()));
+        },
+      ));
+      NavTabs.add(GButton(
+        icon: PhosphorIcons.user,
+        text: 'حسابي',
+        onPressed: () async {
+          User user = await FromPrefs();
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => SettingPage(user: user)));
+        },
+      ));
+    });
   }
 
+  List NavTabs = [];
 
- List NavTabs =[];
-
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext contextBottomNavigator) {
+    void _onItemTapped(int index) {
+      // print(index);
+      setState(() async {
+        User user = await FromPrefs();
+        index == 0
+            ? Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (context) => HomePage()))
+            : index == 1
+                ? Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => InventoryPage()))
+                : index == 2
+                    ? Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ClientMachinesPage()))
+                    : index == 3
+                        ? MaterialPageRoute(
+                            builder: (context) => NotificationsPage())
+                        : MaterialPageRoute(
+                            builder: (context) => SettingPage(user: user));
+      });
+    }
 
     return !kIsWeb
         ? Scaffold(
-            backgroundColor: Colors.white,resizeToAvoidBottomInset: true,
+            backgroundColor: Colors.white,
+            resizeToAvoidBottomInset: true,
             body: Container(
               decoration: const BoxDecoration(
                 color: Color.fromRGBO(26, 26, 36, 1),
@@ -148,8 +175,7 @@ class _MainFragmnetState extends State<MainFragmnet> {
                 ],
               ),
             ),
-            bottomNavigationBar:
-            SafeArea(
+            bottomNavigationBar: SafeArea(
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
@@ -166,17 +192,29 @@ class _MainFragmnetState extends State<MainFragmnet> {
                     duration: Duration(milliseconds: 400),
                     tabBackgroundColor: Color.fromRGBO(29, 41, 57, 1),
                     tabs: [...NavTabs],
+                    //
                     selectedIndex: widget.content.toString() ==
                             "HomePageContent"
                         ? 0
                         : widget.content.toString() == "InventoryPageContent"
-                            ? NavTabs.length ==3? 1:1
-                            : widget.content.toString() == "Details"
-                                ? NavTabs.length ==3? 2:3
-                                : widget.content.toString() ==
-                                        "NotificationsPageContent"
-                                    ? NavTabs.length ==3? 1:2
-                                    : 0,
+                            ? NavTabs.length == 3
+                                ? 1
+                                : 1
+                            : widget.content.toString() ==
+                                    "ClientMachinesPageContent"
+                                ? NavTabs.length == 3
+                                    ? 1
+                                    : 2
+                                : widget.content.toString() == "Details"
+                                    ? NavTabs.length == 3
+                                        ? 2
+                                        : 4
+                                    : widget.content.toString() ==
+                                            "NotificationsPageContent"
+                                        ? NavTabs.length == 3
+                                            ? 1
+                                            : 3
+                                        : 0,
                     onTabChange: (index) {
                       setState(() {});
                     },

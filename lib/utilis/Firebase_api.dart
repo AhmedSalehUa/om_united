@@ -25,13 +25,13 @@ class FirebaseApi {
             sound: true);
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print("granted");
+      // print("granted");
     }
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
             alert: true, badge: true, sound: true);
 
-    print(fCMToken);
+    // print(fCMToken);
 
     return fCMToken!.isEmpty ? "" : fCMToken;
   }

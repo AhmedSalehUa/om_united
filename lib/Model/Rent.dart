@@ -1,40 +1,39 @@
+import 'package:om_united/Model/ClientsModel.dart';
+
+import 'RentsAttachments.dart';
+
 class Rent {
   final int id;
-  final String name;
   final String date;
   final String dateTo;
-  final String phone;
-  final String nationalId;
-  final String guardPhone;
-  final String location;
-  final String imageUrl;
-  final String imageExt;
+    String? notes;
+
+  ClientsModel? client;
+  List<RentsAttachments>? attachments;
 
   Rent({
     required this.id,
-    required this.name,
     required this.date,
-    required this.phone,
-    required this.location,
-    required this.nationalId,
-    required this.guardPhone,
     required this.dateTo,
-    required this.imageUrl,
-    required this.imageExt,
+    this.notes,
+    this.client,
+    this.attachments,
   });
 
   factory Rent.fromJson(Map<String, dynamic> json) {
+    List<RentsAttachments> attachments = [];
+    if (json['Attachments'] != false) {
+      for (var itemJson in json['Attachments']) {
+        final item = RentsAttachments.fromJson(itemJson);
+        attachments.add(item);
+      }
+    }
+    ClientsModel? client = ClientsModel.fromJson(json['Clients'][0]);
+
     return Rent(
         id: int.parse(json['id']),
-        name: json['name'],
-        location: json['address'],
-        imageUrl: json['doc'],
         date: json['date_from'],
-        imageExt: json['doc_ext'],
-        dateTo: json['date_to'],
-        guardPhone: json['guard_phone'],
-        nationalId: json['national_id'],
-        phone: json['phone']);
+        dateTo: json['date_to'],client: client,notes: json['notes'],
+        attachments: attachments);
   }
-
 }

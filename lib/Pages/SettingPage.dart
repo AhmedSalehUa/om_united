@@ -178,7 +178,7 @@ class _DetailsState extends State<Details> {
                                     "POST",
                                     Uri.parse("${URL_PROVIDER()}/Users.php"),
                                   );
-                                  print(widget.user.id);
+                                  // print(widget.user.id);
 
                                   request.fields.addAll({
                                     "id": widget.user.id.toString(),

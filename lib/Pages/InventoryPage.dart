@@ -83,9 +83,7 @@ class _InventoryPageContent extends State<InventoryPageContent> {
       final List<Machine> items = [];
 
       for (var itemJson in jsonData) {
-
         final item = Machine.fromJson(itemJson);
-
         items.add(item);
       }
 
@@ -170,51 +168,53 @@ class _InventoryPageContent extends State<InventoryPageContent> {
           const SizedBox(
             height: 16,
           ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height *.45  ,
-            child: FutureBuilder<List<Machine>>(
-              future: _futureItems,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final items = snapshot.data!;
-                  return GridView.builder(
-                    physics: ScrollPhysics(),
-                    itemCount: items.length,
-                    cacheExtent: 9999,
+          Expanded(
+            child: SizedBox(
+              height:kIsWeb? MediaQuery.of(context).size.height : MediaQuery.of(context).size.height *.4  ,
+              child: FutureBuilder<List<Machine>>(
+                future: _futureItems,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final items = snapshot.data!;
+                    return GridView.builder(
+                      physics:  ScrollPhysics(),
+                      itemCount: items.length,
+                      cacheExtent: 9999,
 
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        mainAxisExtent: kIsWeb ? 200 : 170,
-                        crossAxisCount: kIsWeb
-                            ? MediaQuery.of(context).size.width ~/ 280
-                            : 2,
-                        crossAxisSpacing: kIsWeb ? 90 : 20, ),
-                    itemBuilder: (context, index) {
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          mainAxisExtent: kIsWeb ? 200 : 170,
+                          crossAxisCount: kIsWeb
+                              ? MediaQuery.of(context).size.width ~/ 280
+                              : 2,
+                          crossAxisSpacing: kIsWeb ? 90 : 20, ),
+                      itemBuilder: (context, index) {
 
-                      final item = items[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MachineDetails(
-                                        item: item,
-                                      )));
-                        },
-                        child: MachineItems(
-                          state: item.status,
-                          name: item.name,
-                          id: "#${item.id}",
-                          imageUrl:
-                              item.imageUrl != null ? item.imageUrl! : "",
-                        ),
-                      );
-                    },
-                  );
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                }
-                return Center(child: CircularProgressIndicator());
-              },
+                        final item = items[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MachineDetails(
+                                          item: item,
+                                        )));
+                          },
+                          child: MachineItems(
+                            state: item.status,
+                            name: item.name,
+                            id: "#${item.serial}",
+                            imageUrl:
+                                item.imageUrl != null ? item.imageUrl! : "",
+                          ),
+                        );
+                      },
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
+                  return Center(child: CircularProgressIndicator());
+                },
+              ),
             ),
           )
         ],
