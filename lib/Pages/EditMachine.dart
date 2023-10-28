@@ -23,6 +23,7 @@ import '../Model/Machine.dart';
 import '../utilis/Utilis.dart';
 import 'AddMachineCategory.dart';
 import 'InventoryPage.dart';
+import 'MainFragmnet.dart';
 import 'MiniFragmnet.dart';
 
 class EditMachine extends StatefulWidget {
@@ -70,11 +71,15 @@ class _EditMachineFormState extends State<EditMachineForm> {
   TextEditingController _brandTextController = TextEditingController();
   TextEditingController _maintanceEverTextController = TextEditingController();
   TextEditingController _totalMaintanceCostTextController =
-      TextEditingController();
+  TextEditingController();
+  TextEditingController _macineValueTextController =
+  TextEditingController();
+
 
   TextEditingController _dateOfContractTextController = TextEditingController();
   TextEditingController _dateRangTextController = TextEditingController();
   TextEditingController _notesTextController = TextEditingController();
+  TextEditingController _costTextController = TextEditingController();
 
   @override
   void initState() {
@@ -92,6 +97,8 @@ class _EditMachineFormState extends State<EditMachineForm> {
         TextEditingValue(text: widget.item.maintainceEvery!);
     _totalMaintanceCostTextController.value =
         TextEditingValue(text: widget.item.total_maintance_cost!);
+    _macineValueTextController.value =
+        TextEditingValue(text: widget.item.machine_value!);
 
     if (widget.item.rent != null) {
       _dateOfContractTextController.value =
@@ -100,6 +107,8 @@ class _EditMachineFormState extends State<EditMachineForm> {
           TextEditingValue(text: widget.item.rent!.dateTo);
       _notesTextController.value =
           TextEditingValue(text: widget.item.rent!.notes!);
+      _costTextController.value =
+          TextEditingValue(text: widget.item.rent!.cost!=null?widget.item.rent!.cost!:"0");
       setState(() {
         selectedClient = widget.item.rent!.client!.id.toString();
       });
@@ -162,7 +171,7 @@ class _EditMachineFormState extends State<EditMachineForm> {
     ];
     Future<void> Submit() async {
       if (_nameTextController.text != "" &&
-          _maintanceEverTextController.text != "" &&
+          _maintanceEverTextController.text != "" &&_macineValueTextController!= ""&&
           selectedCategory != null) {
         if (selectedValue == "3" && selectedClient == null) {
           Fluttertoast.showToast(
@@ -241,10 +250,12 @@ class _EditMachineFormState extends State<EditMachineForm> {
               "category": selectedCategory == null ? "1" : selectedCategory!,
               "rent_maintance_every": _maintanceEverTextController.text,
               "total_maintance_cost": _totalMaintanceCostTextController.text,
+              "machine_value": _macineValueTextController.text,
               "rent_user_id": prefs.getInt("id").toString(),
               "rent_date_from": _dateOfContractTextController.text,
               "rent_date_to": _dateRangTextController.text,
               "rent_notes": _notesTextController.text,
+              "rent_cost": _costTextController.text,
               "rent_client_id": selectedClient == null ? "1" : selectedClient!,
             });
           } else {
@@ -257,6 +268,7 @@ class _EditMachineFormState extends State<EditMachineForm> {
               "status": selectedValue == null ? "1" : selectedValue!,
               "rent_maintance_every": _maintanceEverTextController.text,
               "total_maintance_cost": _totalMaintanceCostTextController.text,
+              "machine_value": _macineValueTextController.text,
             });
           }
           var response = await request.send();
@@ -292,7 +304,11 @@ class _EditMachineFormState extends State<EditMachineForm> {
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const InventoryPage()));
+                        builder: (context) => MainFragmnet(
+                            subHeader: SizedBox(),
+                            content: SizedBox(),
+                            isMainWidget: false,
+                            selectedIndex: 1)));
                 Fluttertoast.showToast(
                     msg: "تم التعديل",
                     toastLength: Toast.LENGTH_LONG,
@@ -406,6 +422,13 @@ class _EditMachineFormState extends State<EditMachineForm> {
                                     label: "تاريخ الانتهاء",
                                     controller: _dateRangTextController),
                                 const SizedBox(
+                                  height: 10,
+                                ),
+                                noIconedTextField(
+                                  'قيمة الايجار',
+                                  _costTextController,
+                                  onTextChange: (value) {},
+                                ),const SizedBox(
                                   height: 10,
                                 ),
                                 noIconedTextArea(
@@ -526,6 +549,14 @@ class _EditMachineFormState extends State<EditMachineForm> {
                         splittedTextField(
                             kIsWeb ? 'اجمالي صيانة المولد' : 'اجمالي الصيانات',
                             _totalMaintanceCostTextController,
+                            'ريال',
+                            height: 40),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        splittedTextField(
+                            'قـيـمـــة الـمــولــــد'  ,
+                            _macineValueTextController,
                             'ريال',
                             height: 40),
                       ],

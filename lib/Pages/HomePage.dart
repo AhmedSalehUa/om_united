@@ -6,6 +6,7 @@ import 'package:om_united/ListItems/AlertMaintainceItem.dart';
 import 'package:om_united/Model/Machine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Components/Header.dart';
 import '../utilis/Utilis.dart';
 import 'MainFragmnet.dart';
 import '../SubHeader/MainPageSubHeader.dart';
@@ -64,7 +65,55 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MainFragmnet(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color.fromRGBO(26, 26, 36, 1),
+        image: DecorationImage(
+          image: AssetImage("assets/images/ContainerBackground.png"),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          kIsWeb
+              ? Header(
+            isMain: true,
+          )
+              : SizedBox(),
+          MainPageSubHeader(
+            name: UserName,
+          ),
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(0),
+              padding: const EdgeInsets.only(bottom: 5),
+              decoration: const ShapeDecoration(
+                color: Color.fromRGBO(249, 250, 251, 1),
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      width: 0.50,
+                      color: Color.fromRGBO(52, 64, 84, 1)),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15)),
+                ),
+              ),
+              child: SafeArea(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverFillRemaining(
+                        hasScrollBody: false, child:HomePageContent())
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+    MainFragmnet(
       selectedIndex: 0,
       isMainWidget: true,
       subHeader: MainPageSubHeader(

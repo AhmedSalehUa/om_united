@@ -12,12 +12,14 @@ import 'package:om_united/Model/Machine.dart';
 import 'package:om_united/Pages/AddMachineCategory.dart';
 import 'package:om_united/Pages/InventoryPage.dart';
 import 'package:om_united/Pages/MachineDetails.dart';
+import 'package:om_united/Pages/MainFragmnet.dart';
 import 'package:om_united/utilis/Firebase_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Model/User.dart';
 import 'Pages/AddMachine.dart';
 import 'Pages/HomePage.dart';
 import 'firebase_options.dart';
+import '../Model/User.dart' as LocalUser;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,14 +28,31 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  if (!kIsWeb)   {
+  if (!kIsWeb) {
     FirebaseApi a = FirebaseApi();
     String token = await a.initNotificattions();
     await prefs.setString('token', token);
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
   // HttpOverrides.global = MyHttpOverrides();
-  runApp(  MyApp( email: prefs.getString("email")!=null?prefs.getString("email")!:"",pass:  prefs.getString("pass")!=null?prefs.getString("pass")!:"", ));
+  try{
+    LocalUser.User user = LocalUser.User(
+      id: prefs.getInt("id")!,
+      name: prefs.getString('name')!,
+      user_name: prefs.getString('userName')!,
+      email: prefs.getString('email')!,
+      role: prefs.getString('role')! == "admin" ? "1" : "2",
+      token: prefs.getString('token')!,
+      userImage: prefs.getString('userImage')!,
+    );
+    runApp(MyApp(user:user, pass:prefs.getString("pass")!=null?prefs.getString("pass")!:"" ));
+  }catch(e){
+    runApp(  MaterialApp(
+      title: 'OM United',
+      debugShowCheckedModeBanner: false,
+      home:Login(),
+    ));
+  }
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -42,10 +61,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class MyApp extends StatelessWidget {
-  final String email;
+  final  LocalUser.User user  ;
   final String pass;
-  const MyApp({super.key,required this.email,required this.pass});
-
+  const MyApp({super.key, required this.user,required this.pass });
 
   @override
   Widget build(BuildContext context) {
@@ -54,29 +72,24 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'OM United',
       debugShowCheckedModeBanner: false,
-      home: getHome(email,pass),
-
+      home: getHome(user.email,  pass ,user),
     );
   }
 }
-Widget getHome(email,pass)  {
-if(email != "" && pass != ""){
-  try {
-    FirebaseAuth.instance
-        .signInWithEmailAndPassword(
-        email: email,
-        password: pass)
-    ;
-  } catch (rx) {}
 
-  return HomePage();
-}else{
-  print("not logged");
-  return Login();
+Widget getHome(email, pass,LocalUser.User user) {
+  if (email != "" && pass != "") {
+    try {
+      FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: pass);
+    } catch (rx) {}
+
+    return   MainFragmnet(subHeader: SizedBox(), content: SizedBox(), isMainWidget: false,user: user );
+  } else {
+    print("not logged");
+    return Login();
+  }
 }
-
-}
-
 
 // class MyHttpOverrides extends HttpOverrides {
 //   @override

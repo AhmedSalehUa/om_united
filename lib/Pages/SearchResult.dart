@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
+import 'package:om_united/Components/Header.dart';
 import 'package:om_united/ListItems/MachineItem.dart';
 import 'package:om_united/Components/Widgets.dart';
 import 'package:om_united/Model/Machine.dart';
+import 'package:om_united/Model/User.dart';
 import 'package:om_united/Pages/MachineDetails.dart';
 
 import 'package:http/http.dart' as http;
@@ -15,7 +18,8 @@ import 'MainFragmnet.dart';
 
 class SearchResult extends StatefulWidget {
   final String SearchKey;
-  const SearchResult({Key? key,required this.SearchKey}) : super(key: key);
+  User? user;
+    SearchResult({Key? key,required this.SearchKey,this.user}) : super(key: key);
 
   @override
   State<SearchResult> createState() => _SearchResultPage();
@@ -26,7 +30,32 @@ class _SearchResultPage extends State<SearchResult> {
   @override
   Widget build(BuildContext context) {
     // return InventoryPageContent(onChanged: _updateChildWidgetState);
-    return MainFragmnet(
+    return  Scaffold(
+      resizeToAvoidBottomInset: true,
+      body:  Container(
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(26, 26, 36, 1),
+          image: DecorationImage(
+            image: AssetImage("assets/images/ContainerBackground.png"),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Header(isMain: false),
+            SearchResultSubHeader(
+            searchText: widget.SearchKey,
+          ),
+            SearchResultContent(SearchKey: widget.SearchKey,),
+          ],
+        ),
+      ),
+
+    ) ;
+    MainFragmnet(
+      user: widget.user,
       isMainWidget: false,
       subHeader: SearchResultSubHeader(
        searchText: widget.SearchKey,
@@ -146,7 +175,6 @@ class _SearchResultContent extends State<SearchResultContent> {
                       final item = items[index];
                       return GestureDetector(
                         onTap: () {
-
                           Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -157,7 +185,7 @@ class _SearchResultContent extends State<SearchResultContent> {
                         child: MachineItems(
                           state: item.status,
                           name: item.name,
-                          id: "#${item.id}",
+                          id: "#${item.serial}",
                           imageUrl:
                           item.imageUrl != null ? item.imageUrl! : "",
                         ),

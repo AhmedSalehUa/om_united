@@ -12,7 +12,8 @@ import 'package:om_united/SubHeader/InventorySubHeader.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:om_united/utilis/Utilis.dart';
- import 'MainFragmnet.dart';
+ import '../Components/Header.dart';
+import 'MainFragmnet.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({Key? key}) : super(key: key);
@@ -41,7 +42,58 @@ class _InventoryPage extends State<InventoryPage> {
   @override
   Widget build(BuildContext context) {
     // return InventoryPageContent(onChanged: _updateChildWidgetState);
-    return MainFragmnet(
+    return
+      Container(
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(26, 26, 36, 1),
+          image: DecorationImage(
+            image: AssetImage("assets/images/ContainerBackground.png"),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            kIsWeb
+                ? Header(
+              isMain:false,
+            )
+                : SizedBox(),
+            InventorySubHeader(
+              isAddvisible: _isAddVisible,
+              totalItems: count,
+            ),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(0),
+                padding: const EdgeInsets.only(bottom: 5),
+                decoration: const ShapeDecoration(
+                  color: Color.fromRGBO(249, 250, 251, 1),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                        width: 0.50,
+                        color: Color.fromRGBO(52, 64, 84, 1)),
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15)),
+                  ),
+                ),
+                child: SafeArea(
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverFillRemaining(
+                          hasScrollBody: false, child:  InventoryPageContent(
+                          onChanged: _updateChildWidgetState, setCounter: setCount))
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    MainFragmnet(
       selectedIndex : 1,
       isMainWidget: false,
       subHeader: InventorySubHeader(

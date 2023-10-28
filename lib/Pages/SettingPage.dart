@@ -23,33 +23,108 @@ import 'MainFragmnet.dart';
 import 'MiniFragmnet.dart';
 
 class SettingPage extends StatefulWidget {
-  final LocalUser.User user;
+  LocalUser.User? user;
 
-  const SettingPage({Key? key, required this.user}) : super(key: key);
+  SettingPage({Key? key, this.user}) : super(key: key);
 
   @override
   State<SettingPage> createState() => _SettingPageState();
 }
 
 class _SettingPageState extends State<SettingPage> {
+  LocalUser.User? user;
+
+  Future<LocalUser.User> getCurrentUsers() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    LocalUser.User user = LocalUser.User(
+      id: prefs.getInt("id")!,
+      name: prefs.getString('name')!,
+      user_name: prefs.getString('userName')!,
+      email: prefs.getString('email')!,
+      role: prefs.getString('role')! == "admin" ? "1" : "2",
+      token: prefs.getString('token')!,
+      userImage: prefs.getString('userImage')!,
+    );
+    return user;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    if (widget.user != null) {
+      user = widget.user!;
+    } else {
+      getCurrentUsers().then((value) {
+        setState(() {
+          user = value;
+        });
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return kIsWeb
+    return user == null
+        ? SizedBox()
+        : kIsWeb
         ? MiniFragmnet(
-            content: Details(
-              user: widget.user,
+      content: Details(
+        user: user!,
+      ),
+    )
+        : Container(
+      decoration: const BoxDecoration(
+        color: Color.fromRGBO(26, 26, 36, 1),
+        image: DecorationImage(
+          image: AssetImage("assets/images/ContainerBackground.png"),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          kIsWeb
+              ? Header(
+            isMain: false,
+          )
+              : SizedBox(),
+          SubHeader(
+            user: user!,
+          ),
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(0),
+              padding: const EdgeInsets.only(bottom: 5),
+              decoration: const ShapeDecoration(
+                color: Color.fromRGBO(249, 250, 251, 1),
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      width: 0.50,
+                      color: Color.fromRGBO(52, 64, 84, 1)),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15)),
+                ),
+              ),
+              child: SafeArea(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Details(
+                          user: user!,
+                        ))
+                  ],
+                ),
+              ),
             ),
           )
-        : MainFragmnet(
-            selectedIndex: 3,
-            isMainWidget: false,
-            subHeader: SubHeader(
-              user: widget.user,
-            ),
-            content: Details(
-              user: widget.user,
-            ),
-          );
+        ],
+      ),
+    );
   }
 }
 
@@ -71,7 +146,7 @@ class _DetailsState extends State<Details> {
   void fetchData() async {
     try {
       final response =
-          await http.get(Uri.parse("${URL_PROVIDER()}/Users.php"), headers: {
+      await http.get(Uri.parse("${URL_PROVIDER()}/Users.php"), headers: {
         "Access-Control-Allow-Origin": "*",
         'Content-Type': 'application/json',
         'Accept': '*/*'
@@ -106,7 +181,8 @@ class _DetailsState extends State<Details> {
     _userNameTextController.value =
         TextEditingValue(text: widget.user.user_name);
     _emailTextController.value = TextEditingValue(text: widget.user.email);
-    getRole().then((value) => setState(() {
+    getRole().then((value) =>
+        setState(() {
           role = value;
         }));
   }
@@ -132,13 +208,13 @@ class _DetailsState extends State<Details> {
                 children: [
                   !kIsWeb
                       ? subHeaderButton('تسجيل خروج', PhosphorIcons.door, () {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Login()));
-                        },
-                          color: const Color.fromRGBO(249, 213, 218, 1),
-                          shadow: const Color.fromRGBO(249, 213, 218, 1))
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Login()));
+                  },
+                      color: const Color.fromRGBO(249, 213, 218, 1),
+                      shadow: const Color.fromRGBO(249, 213, 218, 1))
                       : SizedBox(),
                   SizedBox(
                     width: 20,
@@ -158,14 +234,16 @@ class _DetailsState extends State<Details> {
               const SizedBox(
                 height: 20,
               ),
-              SingleChildScrollView(scrollDirection: Axis.horizontal,
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextButton.icon(
-                        onPressed: () => {
+                        onPressed: () =>
+                        {
                           showDialog(
                             barrierColor: Colors.black26,
                             context: context,
@@ -183,7 +261,7 @@ class _DetailsState extends State<Details> {
                                   request.fields.addAll({
                                     "id": widget.user.id.toString(),
                                     "img":
-                                        "https://static.vecteezy.com/system/resources/thumbnails/004/607/806/small/man-face-emotive-icon-smiling-bearded-male-character-in-yellow-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg",
+                                    "https://static.vecteezy.com/system/resources/thumbnails/004/607/806/small/man-face-emotive-icon-smiling-bearded-male-character-in-yellow-flat-illustration-isolated-on-white-happy-human-psychological-portrait-positive-emotions-user-avatar-for-app-web-design-vector.jpg",
                                   });
                                   var response = await request.send();
                                   if (response.statusCode == 200) {
@@ -202,7 +280,7 @@ class _DetailsState extends State<Details> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  const HomePage()));
+                                              const HomePage()));
                                       Fluttertoast.showToast(
                                           msg: res["message"],
                                           toastLength: Toast.LENGTH_LONG,
@@ -253,7 +331,8 @@ class _DetailsState extends State<Details> {
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: TextButton.icon(
-                        onPressed: () => {
+                        onPressed: () =>
+                        {
                           showDialog(
                             barrierColor: Colors.black26,
                             context: context,
@@ -294,19 +373,19 @@ class _DetailsState extends State<Details> {
                     ),
                     widget.user.userImage != ""
                         ? CircleAvatar(
-                            child: Image.network(widget.user.userImage),
-                          )
+                      child: Image.network(widget.user.userImage),
+                    )
                         : RawMaterialButton(
-                            elevation: 2.0,
-                            fillColor: const Color.fromRGBO(205, 230, 244, 1),
-                            padding: const EdgeInsets.all(26),
-                            shape: const CircleBorder(),
-                            onPressed: () {},
-                            child: const Icon(
-                              PhosphorIcons.user,
-                              size: 18,
-                            ),
-                          ),
+                      elevation: 2.0,
+                      fillColor: const Color.fromRGBO(205, 230, 244, 1),
+                      padding: const EdgeInsets.all(26),
+                      shape: const CircleBorder(),
+                      onPressed: () {},
+                      child: const Icon(
+                        PhosphorIcons.user,
+                        size: 18,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -315,13 +394,13 @@ class _DetailsState extends State<Details> {
               ),
               SizedBox(
                 width: 420,
-                child: noIconedTextField(
-                    'اسم المستخدم', _userNameTextController,
-                    onTextChange: (value) async{
+                child:
+                noIconedTextField('اسم المستخدم', _userNameTextController,
+                    onTextChange: (value) async {
                       final SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      await  prefs.setString("NewUserName", value);
-                      await   prefs.setString("NewName", value);
+                      await SharedPreferences.getInstance();
+                      await prefs.setString("NewUserName", value);
+                      await prefs.setString("NewName", value);
                     }, height: 60),
               ),
             ],
@@ -331,7 +410,10 @@ class _DetailsState extends State<Details> {
           height: 20,
         ),
         Container(
-          width: MediaQuery.of(context).size.width,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
           decoration: ShapeDecoration(
             color: Colors.white,
             shape: RoundedRectangleBorder(
@@ -359,10 +441,10 @@ class _DetailsState extends State<Details> {
               SizedBox(
                 width: 420,
                 child: noIconedTextField("الايميل", _emailTextController,
-                    onTextChange: (value)async {
+                    onTextChange: (value) async {
                       final SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      await  prefs.setString("NewEmail", value);
+                      await SharedPreferences.getInstance();
+                      await prefs.setString("NewEmail", value);
                     }, height: 60),
               ),
               const SizedBox(
@@ -371,7 +453,8 @@ class _DetailsState extends State<Details> {
               Directionality(
                 textDirection: TextDirection.rtl,
                 child: TextButton.icon(
-                  onPressed: () => {
+                  onPressed: () =>
+                  {
                     showDialog(
                       barrierColor: Colors.black26,
                       context: context,
@@ -418,149 +501,156 @@ class _DetailsState extends State<Details> {
         ),
         role == "admin"
             ? Container(
-                width: MediaQuery.of(context).size.width,
-                decoration: ShapeDecoration(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    side:
-                        const BorderSide(width: 0.50, color: Color(0x14344054)),
-                    borderRadius: BorderRadius.circular(21),
-                  ),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: TextButton.icon(
-                            onPressed: () => {
-                              showModalBottomSheet<void>(
-                                context: context,
-                                elevation: 2,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      width: 0.50, color: Color(0x14344054)),
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(21),
-                                      topLeft: Radius.circular(21)),
-                                ),
-                                builder: (BuildContext context) {
-                                  final screenHeight =
-                                      MediaQuery.of(context).size.height;
-                                  final desiredHeight = screenHeight *
-                                      0.9; // set the height to 90% of the screen height
-                                  return Container(
-                                    height: desiredHeight,
-                                    child: UserForm(),
-                                  );
-                                },
-                              )
-                            },
-                            icon: const Icon(
-                              PhosphorIcons.plus_light,
-                              size: 18,
-                              color: Color(0xFF1A1A24),
-                            ),
-                            label: const Text(
-                              "إضافة مستخدم جديد",
-                              style: TextStyle(
-                                color: Color(0xFF1A1A24),
-                                fontSize: 14,
-                                fontFamily: 'santo',
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.10,
-                              ),
-                            ),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                Colors.white,
-                              ),
-                              shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
+          decoration: ShapeDecoration(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              side:
+              const BorderSide(width: 0.50, color: Color(0x14344054)),
+              borderRadius: BorderRadius.circular(21),
+            ),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: TextButton.icon(
+                      onPressed: () =>
+                      {
+                        showModalBottomSheet<void>(
+                          context: context,
+                          elevation: 2,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            side: BorderSide(
+                                width: 0.50, color: Color(0x14344054)),
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(21),
+                                topLeft: Radius.circular(21)),
+                          ),
+                          builder: (BuildContext context) {
+                            final screenHeight =
+                                MediaQuery
+                                    .of(context)
+                                    .size
+                                    .height;
+                            final desiredHeight = screenHeight *
+                                0.9; // set the height to 90% of the screen height
+                            return Container(
+                              height: desiredHeight,
+                              child: UserForm(),
+                            );
+                          },
+                        )
+                      },
+                      icon: const Icon(
+                        PhosphorIcons.plus_light,
+                        size: 18,
+                        color: Color(0xFF1A1A24),
+                      ),
+                      label: const Text(
+                        "إضافة مستخدم جديد",
+                        style: TextStyle(
+                          color: Color(0xFF1A1A24),
+                          fontSize: 14,
+                          fontFamily: 'santo',
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.10,
+                        ),
+                      ),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          Colors.white,
+                        ),
+                        shape: MaterialStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        const Text(
-                          "المستخدمين",
-                          style: TextStyle(
-                            color: Color(0xFF1A1A24),
-                            fontSize: 18,
-                            fontFamily: 'santo',
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.15,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: (_userList.length * 80),
-                      child: ListView.builder(
-                        itemCount: _userList.length,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (BuildContext context, int index) {
-                          return GestureDetector(
-                            onTap: () {},
-                            child: ListTile(
-                                title: UserItem(
-                              user: _userList[index],
-                            )),
-                          );
-                        },
                       ),
                     ),
-                  ],
+                  ),
+                  const Text(
+                    "المستخدمين",
+                    style: TextStyle(
+                      color: Color(0xFF1A1A24),
+                      fontSize: 18,
+                      fontFamily: 'santo',
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.15,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: (_userList.length * 80),
+                child: ListView.builder(
+                  itemCount: _userList.length,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                      onTap: () {},
+                      child: ListTile(
+                          title: UserItem(
+                            user: _userList[index],
+                          )),
+                    );
+                  },
                 ),
-              )
+              ),
+            ],
+          ),
+        )
             : SizedBox()
       ],
     );
     return kIsWeb
         ? Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Header(
-                isMain: false,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const Header(
+          isMain: false,
+        ),
+        SubHeader(user: widget.user),
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.all(0),
+            padding: const EdgeInsets.all(20),
+            decoration: const ShapeDecoration(
+              color: Color.fromRGBO(249, 250, 251, 1),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                    width: 0.50, color: Color.fromRGBO(52, 64, 84, 1)),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15)),
               ),
-              SubHeader(user: widget.user),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(0),
-                  padding: const EdgeInsets.all(20),
-                  decoration: const ShapeDecoration(
-                    color: Color.fromRGBO(249, 250, 251, 1),
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          width: 0.50, color: Color.fromRGBO(52, 64, 84, 1)),
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15)),
-                    ),
-                  ),
-                  child: SafeArea(
-                    child: CustomScrollView(
-                      slivers: [
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: content,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            ],
-          )
+            ),
+            child: SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: content,
+                  )
+                ],
+              ),
+            ),
+          ),
+        )
+      ],
+    )
         : Column(
-            children: [content],
-          );
+      children: [content],
+    );
   }
 }
 
@@ -597,16 +687,16 @@ class _SubHeaderState extends State<SubHeader> {
               ),
               kIsWeb
                   ? IconButton(
-                      icon: const Icon(
-                        PhosphorIcons.arrow_right,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      tooltip: 'عودة',
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    )
+                icon: const Icon(
+                  PhosphorIcons.arrow_right,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                tooltip: 'عودة',
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )
                   : const SizedBox(),
             ],
           ),
@@ -628,36 +718,31 @@ class _SubHeaderState extends State<SubHeader> {
   }
 
   void onSaveTap() async {
-    final SharedPreferences prefs =
-        await SharedPreferences.getInstance();
-    if(( prefs.getString("NewUserName")=="") &&(  prefs.getString("NewEmail") =="")){
-
-
-    }else{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if ((prefs.getString("NewUserName") == "") &&
+        (prefs.getString("NewEmail") == "")) {} else {
       var request = http.MultipartRequest(
         "POST",
         Uri.parse("${URL_PROVIDER()}/Users.php"),
       );
       request.fields.addAll({
         "id": widget.user.id.toString(),
-
       });
-      if( prefs.getString("NewUserName")!=""){
+      if (prefs.getString("NewUserName") != "") {
         request.fields.addAll({
           "name": prefs.getString("NewUserName")!,
-          "user_name":prefs.getString("NewUserName")!
+          "user_name": prefs.getString("NewUserName")!
         });
       }
 
-      if( prefs.getString("NewEmail")!=""){
+      if (prefs.getString("NewEmail") != "") {
         request.fields.addAll({
           "email": prefs.getString("NewEmail")!,
         });
       }
       var response = await request.send();
       if (response.statusCode == 200) {
-        var res =
-        json.decode(await response.stream.bytesToString());
+        var res = json.decode(await response.stream.bytesToString());
         if (res["error"]) {
           Fluttertoast.showToast(
               msg: res["message"],
@@ -667,7 +752,7 @@ class _SubHeaderState extends State<SubHeader> {
               textColor: Colors.white,
               fontSize: 16.0);
         } else {
-          if( prefs.getString("NewEmail")!=""){
+          if (prefs.getString("NewEmail") != "") {
             FirebaseAuth.instance.currentUser
                 ?.updateEmail(prefs.getString("NewEmail")!)
                 .then((e) {
@@ -680,7 +765,7 @@ class _SubHeaderState extends State<SubHeader> {
                   textColor: Colors.white,
                   fontSize: 16.0);
             });
-          }else{
+          } else {
             Navigator.pop(context);
             Fluttertoast.showToast(
                 msg: res["message"],

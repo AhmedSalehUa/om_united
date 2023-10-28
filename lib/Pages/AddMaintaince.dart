@@ -18,6 +18,7 @@ import '../Components/MultipleImageDragged.dart';
 import '../Model/Machine.dart';
 import '../utilis/Utilis.dart';
 import 'HomePage.dart';
+import 'MainFragmnet.dart';
 import 'MiniFragmnet.dart';
 
 class AddMaintaince extends StatefulWidget {
@@ -130,7 +131,11 @@ class _AddMaintainceFormState extends State<AddMaintainceForm> {
               fontSize: 16.0);
         } else {
           Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => const HomePage()));
+              MaterialPageRoute(builder: (context) => MainFragmnet(
+                  subHeader: SizedBox(),
+                  content: SizedBox(),
+                  isMainWidget: false,
+                  selectedIndex: 0)));
           Fluttertoast.showToast(
               msg: res["message"],
               toastLength: Toast.LENGTH_LONG,

@@ -18,6 +18,7 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/CustomAlertDialog.dart';
 import '../Components/Header.dart';
+import 'MainFragmnet.dart';
 import 'MiniFragmnet.dart';
 import 'package:http/http.dart' as http;
 
@@ -161,7 +162,11 @@ class _AddMachineFormState extends State<AddMachineForm> {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const InventoryPage()));
+                      builder: (context) =>MainFragmnet(
+                          subHeader: SizedBox(),
+                          content: SizedBox(),
+                          isMainWidget: false,
+                          selectedIndex: 1)));
               Fluttertoast.showToast(
                   msg: res["message"],
                   toastLength: Toast.LENGTH_LONG,

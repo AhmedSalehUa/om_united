@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:om_united/Model/User.dart' as Local;
+import '../Pages/MainFragmnet.dart';
 import '../utilis/Utilis.dart';
 
 class LoginForm extends StatefulWidget {
@@ -137,10 +138,19 @@ class _LoginFormState extends State<LoginForm> {
                               password: _passwordTextController.text)
                           ;
                         } catch (rx) {}
-                        Navigator.pushReplacement(
+                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => HomePage()));
+                                builder: (context) => kIsWeb
+                                    ? Scaffold(
+                                  body: HomePage(),
+                                ): MainFragmnet(
+                                  subHeader: SizedBox(),
+                                  content: SizedBox(),
+                                  isMainWidget: false,
+                                  user: user,
+                                ))
+                        );
                       }
                     } else {
                       setState(() {

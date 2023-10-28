@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
@@ -45,11 +46,21 @@ class _ClientRentItemState extends State<ClientRentItem> {
                 ),
               ),
               child: GestureDetector(
-                onTap: () {
-                  _launchUrl(Uri.parse(e.photo));
+                onTap: ()   {
+                  print(e.photo);
+                    LAUNCH_URL(e.photo.replaceAll(" ","%20"));
+
                 },
-                child: CachedNetworkImage(
-                  imageUrl: e.photo,
+                child: e.photo.contains("mp4")? DottedBorder(
+                  child: Container(
+                    width: 300,
+                    height: 300,
+                    child: Center(
+                      child: Text("Video"),
+                    ),
+                  ),
+                ):CachedNetworkImage(
+                  imageUrl:  e.photo,
                   fit: BoxFit.fill,
                 ),
               ),
@@ -58,7 +69,7 @@ class _ClientRentItemState extends State<ClientRentItem> {
     List<Widget> content = [
       SingleChildScrollView(scrollDirection: Axis.horizontal,
         child: Container(
-          height: 80,
+
           decoration: ShapeDecoration(
             shape: RoundedRectangleBorder(
               side: const BorderSide(width: 0.50, color: Color(0x14344054)),
@@ -86,16 +97,53 @@ class _ClientRentItemState extends State<ClientRentItem> {
               letterSpacing: 0.10,
             ),
           ),
-          Text(
-            widget.rent.date,
-            textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: Color(0xFF98A1B2),
-              fontSize: 11,
-              fontFamily: 'sonto',
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.50,
+          Row(
+            children: [
+              Text(
+                widget.rent.dateTo,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  color: Color(0xFF98A1B2),
+                  fontSize: 11,
+                  fontFamily: 'sonto',
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.50,
+                ),
+              ),
+              Text(
+                " الي : ",
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  color: Color(0xFF98A1B2),
+                  fontSize: 11,
+                  fontFamily: 'sonto',
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.50,
+                ),
+              ),Text(
+              widget.rent.date,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: Color(0xFF98A1B2),
+                fontSize: 11,
+                fontFamily: 'sonto',
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.50,
+              ),
             ),
+              Text(
+                "تاريخ الايجار من : ",
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  color: Color(0xFF98A1B2),
+                  fontSize: 11,
+                  fontFamily: 'sonto',
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.50,
+                ),
+              ),
+
+            ],
           ),
           Row(
             children: [
@@ -198,6 +246,20 @@ class _ClientRentItemState extends State<ClientRentItem> {
           Directionality(
             textDirection: TextDirection.rtl,
             child: Text(
+              'قيمة الايجار  : ${widget.rent.cost!=null?widget.rent.cost!:"0"}',
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: Color(0xFF475467),
+                fontSize: 12,
+                fontFamily: 'santo',
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.50,
+              ),
+            ),
+          ),
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: Text(
              'ملاحظات : ${widget.rent.notes!}',
               textAlign: TextAlign.right,
               style: const TextStyle(
@@ -213,7 +275,7 @@ class _ClientRentItemState extends State<ClientRentItem> {
       )
     ];
     return Container(
-      height: kIsWeb ? 180 : 260,
+      height: kIsWeb ? 200 : 280,
       padding: EdgeInsets.all(8),
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(

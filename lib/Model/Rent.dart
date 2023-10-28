@@ -6,7 +6,8 @@ class Rent {
   final int id;
   final String date;
   final String dateTo;
-    String? notes;
+  String? cost;
+  String? notes;
 
   ClientsModel? client;
   List<RentsAttachments>? attachments;
@@ -15,6 +16,7 @@ class Rent {
     required this.id,
     required this.date,
     required this.dateTo,
+    this.cost,
     this.notes,
     this.client,
     this.attachments,
@@ -32,7 +34,7 @@ class Rent {
 
     return Rent(
         id: int.parse(json['id']),
-        date: json['date_from'],
+        date: json['date_from'],cost: json['cost'],
         dateTo: json['date_to'],client: client,notes: json['notes'],
         attachments: attachments);
   }

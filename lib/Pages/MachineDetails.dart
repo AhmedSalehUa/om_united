@@ -19,6 +19,7 @@ import '../ListItems/MachineItem.dart';
 import '../Components/Widgets.dart';
 import 'package:http/http.dart' as http;
 import 'InventoryPage.dart';
+import 'MainFragmnet.dart';
 import 'MiniFragmnet.dart';
 
 class MachineDetails extends StatefulWidget {
@@ -129,8 +130,25 @@ class _DetailsState extends State<Details> {
               Align(
                 alignment: AlignmentDirectional.topEnd,
                 child: Text(
-                  widget.item.brand == null ? "Brand" : widget.item.brand!,
-                  textAlign: TextAlign.right,
+                  widget.item.brand == null ? "الماركة" : " الماركة : "+ widget.item.brand!,
+                  textAlign: TextAlign.right,textDirection: TextDirection.rtl,
+                  style: const TextStyle(
+                    color: Color(0xFF475467),
+                    fontSize: 14,
+                    fontFamily: 'santo',
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.10,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Align(
+                alignment: AlignmentDirectional.topEnd,
+                child: Text(
+                  widget.item.code == null ? "الرقم التعريفي" :   " الرقم التعريفي : "+widget.item.code!,
+                  textAlign: TextAlign.right,textDirection: TextDirection.rtl,
                   style: const TextStyle(
                     color: Color(0xFF475467),
                     fontSize: 14,
@@ -159,6 +177,8 @@ class _DetailsState extends State<Details> {
                     state: widget.item.status,
                   ),
                 ),
+              ), const SizedBox(
+                height: 15,
               ),
               Align(
                 alignment: AlignmentDirectional.topEnd,
@@ -173,7 +193,32 @@ class _DetailsState extends State<Details> {
                   ),
                   padding: EdgeInsets.all(15),
                   child: Text( "اجمالي تكلفة الصيانة : " + widget.item.total_maintance_cost.toString() , textAlign: TextAlign.right,
-                    style: const TextStyle(
+                    textDirection: TextDirection.rtl, style: const TextStyle(
+                      color: Color(0xFF475467),
+                      fontSize: 14,
+                      fontFamily: 'santo',
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.10,
+                    ),),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Align(
+                alignment: AlignmentDirectional.topEnd,
+                child: Container(
+                  width: 230,
+                  decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      side:
+                      const BorderSide(width: 2, color: Color(0x14344054)),
+                      borderRadius: BorderRadius.circular(21),
+                    ),
+                  ),
+                  padding: EdgeInsets.all(15),
+                  child: Text( "قيمة المولد : " + widget.item.machine_value.toString() , textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl, style: const TextStyle(
                       color: Color(0xFF475467),
                       fontSize: 14,
                       fontFamily: 'santo',
@@ -426,7 +471,11 @@ class _SubHeaderState extends State<SubHeader> {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => InventoryPage()));
+                                    builder: (context) => MainFragmnet(
+                                        subHeader: SizedBox(),
+                                        content: SizedBox(),
+                                        isMainWidget: false,
+                                        selectedIndex: 1)));
                           },
                         );
                       },

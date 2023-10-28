@@ -23,28 +23,23 @@ class Header extends StatefulWidget {
 }
 
 class _HeaderState extends State<Header> {
-String role = "";
+  String role = "";
 
-      Future<String> getRole()async{
-          final SharedPreferences prefs =
-          await SharedPreferences.getInstance();
-          return prefs.getString('role')!;
-      }
+  Future<String> getRole() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role')!;
+  }
 
   @override
   void initState() {
     super.initState();
-     getRole().then((value) => setState(() {
-      role=value;
-    })) ;
-
-
+    getRole().then((value) => setState(() {
+          role = value;
+        }));
   }
 
-
-@override
+  @override
   Widget build(BuildContext context) {
-
     return Container(
       height: 56,
       width: MediaQuery.of(context).size.width,
@@ -79,7 +74,8 @@ String role = "";
                 onPressed: () {
                   showPopover(
                     context: context,
-                    bodyBuilder: (context) =>   SingleChildScrollView(child: const NotificationsPageContent()) ,
+                    bodyBuilder: (context) => SingleChildScrollView(
+                        child: const NotificationsPageContent()),
                     direction: PopoverDirection.bottom,
                     width: 385,
                     height: 492,
@@ -109,11 +105,22 @@ String role = "";
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: TextField(
-                    onSubmitted: (a) => {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SearchResult(SearchKey: a)))
+                    onSubmitted: (a) async {
+                      final SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      User user = User(
+                        id: prefs.getInt("id")!,
+                        name: prefs.getString('name')!,
+                        user_name: prefs.getString('userName')!,
+                        email: prefs.getString('email')!,
+                        role: prefs.getString('role')! == "admin" ? "1" : "2",
+                        token: prefs.getString('token')!,
+                        userImage: prefs.getString('userImage')!,
+                      );
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) =>
+                          SearchResult(SearchKey: a,user:user)
+                       ));
                     },
                     cursorColor: Colors.white,
                     textAlign: TextAlign.right,
@@ -162,92 +169,101 @@ String role = "";
             ],
           ),
           Row(
-            children: [role =="admin"? Directionality(
-              textDirection: TextDirection.rtl,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>   ClientMachinesPage()));
-                },
-                icon: Icon(
-                  PhosphorIcons.user_circle_bold,
-                  size: 24.0,
-                  color:  Color(0xFF98A1B2) ,
-                ),
-                label: Text(
-                  'العملاء',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color:   Color(0xFF98A1B2)  ,
-                    fontSize: 14,
-                    fontFamily: 'santo',
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.10,
-                  ),
-                ),
-                style: ButtonStyle(
-                  backgroundColor:
-                  MaterialStateProperty.all(Colors.transparent),
-                  shape: MaterialStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(73),
-                      side: BorderSide(
-                          color:   Colors.transparent
-                               ),
+            children: [
+              role == "admin"
+                  ? Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      Scaffold(body: ClientMachinesPage())));
+                        },
+                        icon: Icon(
+                          PhosphorIcons.user_circle_bold,
+                          size: 24.0,
+                          color: Color(0xFF98A1B2),
+                        ),
+                        label: Text(
+                          'العملاء',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: Color(0xFF98A1B2),
+                            fontSize: 14,
+                            fontFamily: 'santo',
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.10,
+                          ),
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.transparent),
+                          shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(73),
+                              side: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox(
+                      width: 10,
                     ),
-                  ),
-                ),
-              ),
-            ):const SizedBox(
-              width: 10,
-            ),
               const SizedBox(
                 width: 10,
               ),
-              role =="admin"? Directionality(
-                textDirection: TextDirection.rtl,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const InventoryPage()));
-                  },
-                  icon: Icon(
-                    PhosphorIcons.package,
-                    size: 24.0,
-                    color: widget.isMain ? Color(0xFF98A1B2) : Colors.white,
-                  ),
-                  label: Text(
-                    'المخزون',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: widget.isMain ? Color(0xFF98A1B2) : Colors.white,
-                      fontSize: 14,
-                      fontFamily: 'santo',
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.10,
-                    ),
-                  ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                    MaterialStateProperty.all(Colors.transparent),
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(73),
-                        side: BorderSide(
+              role == "admin"
+                  ? Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      Scaffold(body: InventoryPage())));
+                        },
+                        icon: Icon(
+                          PhosphorIcons.package,
+                          size: 24.0,
+                          color:
+                              widget.isMain ? Color(0xFF98A1B2) : Colors.white,
+                        ),
+                        label: Text(
+                          'المخزون',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
                             color: widget.isMain
-                                ? Colors.transparent
-                                : const Color.fromRGBO(255, 255, 255, .2)),
+                                ? Color(0xFF98A1B2)
+                                : Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'santo',
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.10,
+                          ),
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.transparent),
+                          shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(73),
+                              side: BorderSide(
+                                  color: widget.isMain
+                                      ? Colors.transparent
+                                      : const Color.fromRGBO(
+                                          255, 255, 255, .2)),
+                            ),
+                          ),
+                        ),
                       ),
+                    )
+                  : const SizedBox(
+                      width: 10,
                     ),
-                  ),
-                ),
-              ):const SizedBox(
-                width: 10,
-              ),
               const SizedBox(
                 width: 10,
               ),
@@ -258,7 +274,7 @@ String role = "";
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const HomePage()));
+                            builder: (context) => Scaffold(body: HomePage())));
                   },
                   icon: Icon(
                     PhosphorIcons.house_line,
@@ -337,25 +353,20 @@ class ListItems extends StatelessWidget {
                   ),
                 ),
               );
-
             },
           ),
           //
           const Divider(),
-          subHeaderButton(
-            'تسجيل خروج',
-            PhosphorIcons.door,
-            () async {
-
-              final SharedPreferences prefs =
-                  await SharedPreferences.getInstance();
-              await prefs.setString('email',"");
-              await prefs.setString('pass', "");
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => const Login()));
-            },
-            color: const Color.fromRGBO(249, 213, 218, 1),shadow:  const Color.fromRGBO(249, 213, 218, 1)
-          ),
+          subHeaderButton('تسجيل خروج', PhosphorIcons.door, () async {
+            final SharedPreferences prefs =
+                await SharedPreferences.getInstance();
+            await prefs.setString('email', "");
+            await prefs.setString('pass', "");
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => const Login()));
+          },
+              color: const Color.fromRGBO(249, 213, 218, 1),
+              shadow: const Color.fromRGBO(249, 213, 218, 1)),
         ],
       ),
     );

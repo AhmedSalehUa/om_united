@@ -21,6 +21,7 @@ import '../Components/MultipleImageDragged.dart';
 import '../ListItems/ClientDropDown.dart';
 import '../Model/MachineCategories.dart';
 import 'AddClientTemp.dart';
+import 'MainFragmnet.dart';
 import 'MiniFragmnet.dart';
 import 'package:http/http.dart' as http;
 
@@ -63,9 +64,11 @@ class _AddMachineFormState extends State<AddMachineForm> {
   TextEditingController _maintanceEverTextController = TextEditingController();
   TextEditingController _totalMaintanceCostTextController =
       TextEditingController();
+  TextEditingController _macineValueTextController = TextEditingController();
 
   TextEditingController _dateOfContractTextController = TextEditingController();
   TextEditingController _dateRangTextController = TextEditingController();
+  TextEditingController _costTextController = TextEditingController();
   TextEditingController _notesTextController = TextEditingController();
 
   void setMachineImage(PlatformFile machinePhotos) {
@@ -101,7 +104,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
   @override
   Widget build(BuildContext context) {
     List<Widget> catRow = [
-      subHeaderButton( '', PhosphorIcons.plus_circle, () {
+      subHeaderButton('', PhosphorIcons.plus_circle, () {
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -139,6 +142,8 @@ class _AddMachineFormState extends State<AddMachineForm> {
     ];
     Future<void> Submit() async {
       if (_nameTextController.text != "" &&
+          _macineValueTextController != "" &&
+          _maintanceEverTextController != "" &&
           selectedValue != "" &&
           selectedCategory != "") {
         context.loaderOverlay.show();
@@ -204,10 +209,12 @@ class _AddMachineFormState extends State<AddMachineForm> {
             "category": selectedCategory == null ? "1" : selectedCategory!,
             "rent_maintance_every": _maintanceEverTextController.text,
             "total_maintance_cost": _totalMaintanceCostTextController.text,
+            "machine_value": _macineValueTextController.text,
             "rent_user_id": prefs.getInt("id").toString(),
             "rent_date_from": _dateOfContractTextController.text,
             "rent_date_to": _dateRangTextController.text,
             "rent_notes": _notesTextController.text,
+            "rent_cost": _costTextController.text,
             "rent_client_id": selectedClient == null ? "1" : selectedClient!,
           });
         } else {
@@ -217,6 +224,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
             "brand": _brandTextController.text,
             "category": selectedCategory == null ? "1" : selectedCategory!,
             "status": selectedValue == null ? "1" : selectedValue!,
+            "machine_value": _macineValueTextController.text,
             "rent_maintance_every": _maintanceEverTextController.text,
             "total_maintance_cost": _totalMaintanceCostTextController.text,
           });
@@ -250,7 +258,11 @@ class _AddMachineFormState extends State<AddMachineForm> {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const InventoryPage()));
+                      builder: (context) => MainFragmnet(
+                          subHeader: SizedBox(),
+                          content: SizedBox(),
+                          isMainWidget: false,
+                          selectedIndex: 1)));
               Fluttertoast.showToast(
                   msg: res["message"],
                   toastLength: Toast.LENGTH_LONG,
@@ -359,6 +371,14 @@ class _AddMachineFormState extends State<AddMachineForm> {
                                 DatePicker(
                                     label: "تاريخ الانتهاء",
                                     controller: _dateRangTextController),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                noIconedTextField(
+                                  'قيمة الايجار',
+                                  _costTextController,
+                                  onTextChange: (value) {},
+                                ),
                                 const SizedBox(
                                   height: 10,
                                 ),
@@ -484,6 +504,12 @@ class _AddMachineFormState extends State<AddMachineForm> {
                             kIsWeb ? 'اجمالي صيانة المولد' : 'اجمالي الصيانات',
                             _totalMaintanceCostTextController,
                             'ريال',
+                            height: 40),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        splittedTextField('قـيـمـــة الـمــولــــد',
+                            _macineValueTextController, 'ريال',
                             height: 40),
                       ],
                     ),
