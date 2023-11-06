@@ -12,17 +12,15 @@ import 'package:om_united/SubHeader/InventorySubHeader.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:om_united/utilis/Utilis.dart';
- import '../Components/Header.dart';
-import 'MainFragmnet.dart';
 
-class InventoryPage extends StatefulWidget {
-  const InventoryPage({Key? key}) : super(key: key);
+class Inventory extends StatefulWidget {
+  const Inventory({Key? key}) : super(key: key);
 
   @override
-  State<InventoryPage> createState() => _InventoryPage();
+  State<Inventory> createState() => _Inventory();
 }
 
-class _InventoryPage extends State<InventoryPage> {
+class _Inventory extends State<Inventory> {
   bool _isAddVisible = true;
 
   void _updateChildWidgetState(bool isOn) {
@@ -32,16 +30,17 @@ class _InventoryPage extends State<InventoryPage> {
   }
 
   int count = 0;
+  int value = 0;
 
-  void setCount(co) {
+  void setCount(co,val) {
     setState(() {
       count = co;
+      value = val;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // return InventoryPageContent(onChanged: _updateChildWidgetState);
     return
       Container(
         decoration: const BoxDecoration(
@@ -55,14 +54,11 @@ class _InventoryPage extends State<InventoryPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            kIsWeb
-                ? Header(
-              isMain:false,
-            )
-                : SizedBox(),
+
             InventorySubHeader(
               isAddvisible: _isAddVisible,
               totalItems: count,
+              totalValue: value,
             ),
             Expanded(
               child: Container(
@@ -83,7 +79,7 @@ class _InventoryPage extends State<InventoryPage> {
                   child: CustomScrollView(
                     slivers: [
                       SliverFillRemaining(
-                          hasScrollBody: false, child:  InventoryPageContent(
+                          hasScrollBody: false, child:  InventoryContent(
                           onChanged: _updateChildWidgetState, setCounter: setCount))
                     ],
                   ),
@@ -93,32 +89,22 @@ class _InventoryPage extends State<InventoryPage> {
           ],
         ),
       );
-    MainFragmnet(
-      selectedIndex : 1,
-      isMainWidget: false,
-      subHeader: InventorySubHeader(
-        isAddvisible: _isAddVisible,
-        totalItems: count,
-      ),
-      content: InventoryPageContent(
-          onChanged: _updateChildWidgetState, setCounter: setCount),
-    );
   }
 }
 
-class InventoryPageContent extends StatefulWidget {
+class InventoryContent extends StatefulWidget {
   final void Function(bool)? onChanged;
-  final void Function(int)? setCounter;
+  final void Function(int,int)? setCounter;
 
-  const InventoryPageContent(
+  const InventoryContent(
       {Key? key, required this.onChanged, required this.setCounter})
       : super(key: key);
 
   @override
-  State<InventoryPageContent> createState() => _InventoryPageContent();
+  State<InventoryContent> createState() => _InventoryContent();
 }
 
-class _InventoryPageContent extends State<InventoryPageContent> {
+class _InventoryContent extends State<InventoryContent> {
   String selectedFilter = "all";
   late Future<List<Machine>> _futureItems;
 
@@ -133,13 +119,13 @@ class _InventoryPageContent extends State<InventoryPageContent> {
           });
       final jsonData = jsonDecode(response.body);
       final List<Machine> items = [];
-
-      for (var itemJson in jsonData) {
+      final dataJson =   jsonData["statics"] ;
+      for (var itemJson in jsonData["data"]) {
         final item = Machine.fromJson(itemJson);
         items.add(item);
       }
 
-      widget.setCounter!(items.length);
+      widget.setCounter!(int.parse(dataJson[0]["count"]) ,int.parse(dataJson[0]["value"]));
 
       return items;
     } catch (e) {

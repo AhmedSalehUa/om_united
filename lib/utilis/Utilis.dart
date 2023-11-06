@@ -11,86 +11,107 @@ hexStringToColor(String hexColor) {
   return Color(int.parse(hexColor, radix: 16));
 }
 
-Align getMachineStatus(String lastMaintance , String maintainceEvery) {
-  int numOfDays = DateTime.parse(lastMaintance)
-      .add(Duration(days: int.parse(maintainceEvery)+1))
-      .difference(DateTime.now())
-      .inDays;
+Align getMachineStatus(String lastMaintance , String maintainceEvery, String status) {
+  if(status=="3") {
+    int numOfDays = DateTime.parse(lastMaintance)
+        .add(Duration(days: int.parse(maintainceEvery) + 1))
+        .difference(DateTime.now())
+        .inDays;
 
-  switch (numOfDays) {
-    case == 0:
-      return const Align(
-        alignment: AlignmentDirectional.bottomStart,
-        child: Row(
-          children: [
-            Text(
-              "اليوم",
-              style: TextStyle(
-                color: Color(0xFFEE8B2F),
+    switch (numOfDays) {
+      case == 0:
+        return const Align(
+          alignment: AlignmentDirectional.bottomStart,
+          child: Row(
+            children: [
+              Text(
+                "اليوم",
+                style: TextStyle(
+                  color: Color(0xFFEE8B2F),
+                ),
               ),
-            ),
-            Icon(
-              PhosphorIcons.timer,
-              color: Color(0xFFEE8B2F),
-            )
-          ],
-        ),
-      );
-    case < 0:
-      return Align(
-        alignment: AlignmentDirectional.bottomStart,
-        child: Row(
-          children: [
-            Text(
-              " متأخر${(numOfDays * -1).toInt()} يوم ",
-              style: const TextStyle(
+              Icon(
+                PhosphorIcons.timer,
+                color: Color(0xFFEE8B2F),
+              )
+            ],
+          ),
+        );
+      case < 0:
+        return Align(
+          alignment: AlignmentDirectional.bottomStart,
+          child: Row(
+            children: [
+              Text(
+                " متأخر${(numOfDays * -1).toInt()} يوم ",
+                style: const TextStyle(
+                  color: Color(0xFFEE2F2F),
+                ),
+              ),
+              const Icon(
+                PhosphorIcons.timer,
                 color: Color(0xFFEE2F2F),
+              )
+            ],
+          ),
+        );
+      case > 5:
+        return Align(
+          alignment: AlignmentDirectional.bottomStart,
+          child: Row(
+            children: [
+              Text(
+                " $numOfDays يوم عن الصيانة القادمة",
+                style: const TextStyle(
+                  color: Color(0xFF475467),
+                ),
               ),
-            ),
-            const Icon(
-              PhosphorIcons.timer,
-              color: Color(0xFFEE2F2F),
-            )
-          ],
-        ),
-      );
-    case > 5:
-      return Align(
-        alignment: AlignmentDirectional.bottomStart,
-        child: Row(
-          children: [
-            Text(
-              " $numOfDays يوم عن الصيانة القادمة",
-              style: const TextStyle(
+              const Icon(
+                PhosphorIcons.timer,
                 color: Color(0xFF475467),
+              )
+            ],
+          ),
+        );
+      default:
+        return Align(
+          alignment: AlignmentDirectional.bottomStart,
+          child: Row(
+            children: [
+              Text(
+                " باقي $numOfDays أيام ",
+                style: const TextStyle(
+                  color: Color(0xFFEE8B2F),
+                ),
               ),
-            ),
-            const Icon(
-              PhosphorIcons.timer,
-              color: Color(0xFF475467),
-            )
-          ],
-        ),
-      );
-    default:
-      return Align(
-        alignment: AlignmentDirectional.bottomStart,
-        child: Row(
-          children: [
-            Text(
-              " باقي $numOfDays أيام ",
-              style: const TextStyle(
+              const Icon(
+                PhosphorIcons.timer,
                 color: Color(0xFFEE8B2F),
-              ),
+              )
+            ],
+          ),
+        );
+    }
+  }else{
+    return Align(
+      alignment: AlignmentDirectional.bottomStart,
+      child: Row(
+        children: [
+          Text(
+            "المكينة بالمخزن",
+            style: const TextStyle(
+              color: Color(0xFF475467),
             ),
-            const Icon(
-              PhosphorIcons.timer,
-              color: Color(0xFFEE8B2F),
-            )
-          ],
-        ),
-      );
+          ),
+          const Icon(
+            PhosphorIcons.timer,
+            color: Color(0xFF475467),
+          )
+        ],
+      ),
+    );
   }
+
 }
 
 String URL_PROVIDER() {

@@ -13,25 +13,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Authentications/Login.dart';
 import '../Components/CustomAlertDialog.dart';
-import '../Components/Header.dart';
 import '../Components/Widgets.dart';
 import 'package:http/http.dart' as http;
+import '../Fragments/MobileFragment.dart';
+import '../Fragments/WebFragment.dart';
 import '../ListItems/UserForm.dart';
 import '../Model/User.dart' as LocalUser;
-import 'HomePage.dart';
-import 'MainFragmnet.dart';
-import 'MiniFragmnet.dart';
+import 'Home.dart';
+import '../Fragments/MiniFragmnet.dart';
 
-class SettingPage extends StatefulWidget {
+class Setting extends StatefulWidget {
   LocalUser.User? user;
 
-  SettingPage({Key? key, this.user}) : super(key: key);
+  Setting({Key? key, this.user}) : super(key: key);
 
   @override
-  State<SettingPage> createState() => _SettingPageState();
+  State<Setting> createState() => _SettingState();
 }
 
-class _SettingPageState extends State<SettingPage> {
+class _SettingState extends State<Setting> {
   LocalUser.User? user;
 
   Future<LocalUser.User> getCurrentUsers() async {
@@ -50,7 +50,6 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     if (widget.user != null) {
@@ -86,11 +85,6 @@ class _SettingPageState extends State<SettingPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          kIsWeb
-              ? Header(
-            isMain: false,
-          )
-              : SizedBox(),
           SubHeader(
             user: user!,
           ),
@@ -277,10 +271,17 @@ class _DetailsState extends State<Details> {
                                           fontSize: 16.0);
                                     } else {
                                       Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                              const HomePage()));
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => kIsWeb
+                                              ? WebFragment(
+                                            selectedIndex: 0,
+                                          )
+                                              : MobileFragment(
+                                            selectedIndex: 0,
+                                          ),
+                                        ),
+                                      );
                                       Fluttertoast.showToast(
                                           msg: res["message"],
                                           toastLength: Toast.LENGTH_LONG,
@@ -616,9 +617,6 @@ class _DetailsState extends State<Details> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        const Header(
-          isMain: false,
-        ),
         SubHeader(user: widget.user),
         Expanded(
           child: Container(

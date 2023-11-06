@@ -13,22 +13,19 @@ import 'package:om_united/SubHeader/InventorySubHeader.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:om_united/utilis/Utilis.dart';
-import '../Components/Header.dart';
 import '../ListItems/ClientDropDown.dart';
 import '../ListItems/ClientDropDownCRUD.dart';
-import 'MainFragmnet.dart';
 
-class ClientMachinesPage extends StatefulWidget {
-  const ClientMachinesPage({Key? key}) : super(key: key);
+class ClientMachines extends StatefulWidget {
+  const ClientMachines({Key? key}) : super(key: key);
 
   @override
-  State<ClientMachinesPage> createState() => _InventoryPage();
+  State<ClientMachines> createState() => _Inventory();
 }
 
-class _InventoryPage extends State<ClientMachinesPage> {
+class _Inventory  extends State<ClientMachines> {
   @override
   Widget build(BuildContext context) {
-    // return InventoryPageContent(onChanged: _updateChildWidgetState);
     return Container(
         decoration: const BoxDecoration(
           color: Color.fromRGBO(26, 26, 36, 1),
@@ -41,11 +38,7 @@ class _InventoryPage extends State<ClientMachinesPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            kIsWeb
-                ? Header(
-              isMain: false,
-            )
-                : SizedBox(),
+
             SubHeader(),
             Expanded(
               child: Container(
@@ -66,7 +59,7 @@ class _InventoryPage extends State<ClientMachinesPage> {
                   child: CustomScrollView(
                     slivers: [
                       SliverFillRemaining(
-                          hasScrollBody: false, child: ClientMachinesPageContent())
+                          hasScrollBody: false, child: ClientMachinesContent())
                     ],
                   ),
                 ),
@@ -75,23 +68,18 @@ class _InventoryPage extends State<ClientMachinesPage> {
           ],
         ),
       );
-      MainFragmnet(
-      selectedIndex: 1,
-      isMainWidget: false,
-      subHeader: SubHeader(),
-      content: ClientMachinesPageContent(),
-    );
+
   }
 }
 
-class ClientMachinesPageContent extends StatefulWidget {
-  const ClientMachinesPageContent({Key? key}) : super(key: key);
+class ClientMachinesContent extends StatefulWidget {
+  const ClientMachinesContent({Key? key}) : super(key: key);
 
   @override
-  State<ClientMachinesPageContent> createState() => _InventoryPageContent();
+  State<ClientMachinesContent> createState() => _InventoryContent();
 }
 
-class _InventoryPageContent extends State<ClientMachinesPageContent> {
+class _InventoryContent extends State<ClientMachinesContent> {
   String  selectedClient="";
   late Future<List<Machine>> _futureItems;
 ClientsModel? clientsModel;
@@ -109,7 +97,7 @@ ClientsModel? clientsModel;
             });
         final jsonData = jsonDecode(response.body);
 
-        for (var itemJson in jsonData) {
+        for (var itemJson in jsonData["data"]) {
           final item = Machine.fromJson(itemJson);
           clientsModel = ClientsModel.fromJson(itemJson['Clients'][0]);
           items.add(item);

@@ -8,13 +8,12 @@ import 'package:om_united/ListItems/ClientRentItem.dart';
 import 'package:om_united/ListItems/MaintainceItem.dart';
 import 'package:om_united/Model/Machine.dart';
 import 'package:om_united/Model/Maintaince.dart';
-import 'package:om_united/Pages/AddMaintaince.dart';
+import 'package:om_united/FormPages/AddMaintaince.dart';
 import 'package:om_united/utilis/Utilis.dart';
 
-import '../Components/Header.dart';
 import '../ListItems/MachineItem.dart';
 import '../Components/Widgets.dart';
-import 'MiniFragmnet.dart';
+import '../Fragments/MiniFragmnet.dart';
 
 class MaintaincePage extends StatefulWidget {
   final Machine item;
@@ -197,7 +196,7 @@ class _DetailsState extends State<Details> {
               height: 10,
             ),
             getMachineStatus(
-                widget.item.lastMaintaince!, widget.item.maintainceEvery),
+                widget.item.lastMaintaince!, widget.item.maintainceEvery, widget.item.status),
           ],
         ),
       ),
@@ -253,11 +252,7 @@ class _DetailsState extends State<Details> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     mainAxisAlignment: MainAxisAlignment.start,
     children: [
-      kIsWeb
-          ? const Header(
-        isMain: false,
-      )
-          : SizedBox(),
+
       SubHeader(
         item: widget.item,
       ),

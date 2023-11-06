@@ -275,7 +275,6 @@ class _ClientRentItemState extends State<ClientRentItem> {
       )
     ];
     return Container(
-      height: kIsWeb ? 200 : 280,
       padding: EdgeInsets.all(8),
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
@@ -283,12 +282,12 @@ class _ClientRentItemState extends State<ClientRentItem> {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      child: kIsWeb
+      child:Wrap(children: [ kIsWeb
           ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: content,
-            )
-          : Column(children: content, verticalDirection: VerticalDirection.up),
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: content,
+      )
+          : Column(children: content, verticalDirection: VerticalDirection.up)]),
     );
   }
 }

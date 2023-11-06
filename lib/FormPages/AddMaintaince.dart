@@ -13,13 +13,13 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:om_united/Components/Widgets.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Components/Header.dart';
 import '../Components/MultipleImageDragged.dart';
+import '../Fragments/MobileFragment.dart';
+import '../Fragments/WebFragment.dart';
 import '../Model/Machine.dart';
 import '../utilis/Utilis.dart';
-import 'HomePage.dart';
-import 'MainFragmnet.dart';
-import 'MiniFragmnet.dart';
+import '../Pages/Home.dart';
+import '../Fragments/MiniFragmnet.dart';
 
 class AddMaintaince extends StatefulWidget {
   final Machine item;
@@ -130,12 +130,18 @@ class _AddMaintainceFormState extends State<AddMaintainceForm> {
               textColor: Colors.white,
               fontSize: 16.0);
         } else {
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => MainFragmnet(
-                  subHeader: SizedBox(),
-                  content: SizedBox(),
-                  isMainWidget: false,
-                  selectedIndex: 0)));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => kIsWeb
+                  ? WebFragment(
+                selectedIndex: 0,
+              )
+                  : MobileFragment(
+                selectedIndex: 0,
+              ),
+            ),
+          );
           Fluttertoast.showToast(
               msg: res["message"],
               toastLength: Toast.LENGTH_LONG,
@@ -159,9 +165,7 @@ class _AddMaintainceFormState extends State<AddMaintainceForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-        kIsWeb ?  const Header(
-            isMain: false,
-          ):SizedBox(),
+
           SubHeader(
             isActive: isActive,
             Submit: Submit,

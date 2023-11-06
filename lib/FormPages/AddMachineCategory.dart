@@ -12,14 +12,14 @@ import 'package:om_united/Components/ImageDragged.dart';
 import 'package:om_united/Components/Widgets.dart';
 import 'package:om_united/ListItems/MachineCategoryItem.dart';
 import 'package:om_united/Model/MachineCategories.dart';
-import 'package:om_united/Pages/InventoryPage.dart';
+import 'package:om_united/Pages/Inventory.dart';
 import 'package:om_united/utilis/Utilis.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/CustomAlertDialog.dart';
-import '../Components/Header.dart';
-import 'MainFragmnet.dart';
-import 'MiniFragmnet.dart';
+import '../Fragments/MobileFragment.dart';
+import '../Fragments/WebFragment.dart';
+import '../Fragments/MiniFragmnet.dart';
 import 'package:http/http.dart' as http;
 
 class AddMachineCategory extends StatefulWidget {
@@ -160,13 +160,17 @@ class _AddMachineFormState extends State<AddMachineForm> {
                   fontSize: 16.0);
             } else {
               Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>MainFragmnet(
-                          subHeader: SizedBox(),
-                          content: SizedBox(),
-                          isMainWidget: false,
-                          selectedIndex: 1)));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => kIsWeb
+                      ? WebFragment(
+                    selectedIndex: 1,
+                  )
+                      : MobileFragment(
+                    selectedIndex: 1,
+                  ),
+                ),
+              );
               Fluttertoast.showToast(
                   msg: res["message"],
                   toastLength: Toast.LENGTH_LONG,
@@ -372,11 +376,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          kIsWeb
-              ? const Header(
-                  isMain: false,
-                )
-              : SizedBox(),
+
           SubHeader(
             mode: mode,
             Clear: clear,
@@ -504,7 +504,7 @@ class _SubHeaderState extends State<SubHeader> {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => InventoryPage()));
+                                  builder: (context) => Inventory()));
                         },
                       );
                     },

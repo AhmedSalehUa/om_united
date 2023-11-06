@@ -6,8 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:om_united/FormPages/EditAssetsCategory.dart';
 import 'package:om_united/ListItems/ClientRentItem.dart';
 import 'package:om_united/ListItems/MaintainceItem.dart';
+import 'package:om_united/Model/Assets.dart';
+import 'package:om_united/Model/AssetsCategory.dart';
 import 'package:om_united/Model/Machine.dart';
 import 'package:om_united/Model/Maintaince.dart';
 import 'package:om_united/FormPages/EditMachine.dart';
@@ -22,16 +25,16 @@ import 'package:http/http.dart' as http;
 import 'Inventory.dart';
 import '../Fragments/MiniFragmnet.dart';
 
-class MachineDetails extends StatefulWidget {
-  final Machine item;
+class AssetsCategoryDetails extends StatefulWidget {
+  final AssetsCategory item;
 
-  const MachineDetails({Key? key, required this.item}) : super(key: key);
+  const AssetsCategoryDetails({Key? key, required this.item}) : super(key: key);
 
   @override
-  State<MachineDetails> createState() => _MachineDetailsState();
+  State<AssetsCategoryDetails> createState() => _AssetsCategoryDetailsState();
 }
 
-class _MachineDetailsState extends State<MachineDetails> {
+class _AssetsCategoryDetailsState extends State<AssetsCategoryDetails> {
   @override
   Widget build(BuildContext context) {
     return MiniFragmnet(
@@ -43,7 +46,7 @@ class _MachineDetailsState extends State<MachineDetails> {
 }
 
 class Details extends StatefulWidget {
-  final Machine item;
+  final AssetsCategory item;
 
   const Details({Key? key, required this.item}) : super(key: key);
 
@@ -55,7 +58,7 @@ class _DetailsState extends State<Details> {
   Future<void> Delete() async {
     var request = http.MultipartRequest(
       "POST",
-      Uri.parse("${URL_PROVIDER()}/Machines.php"),
+      Uri.parse("${URL_PROVIDER()}/AssetsCategory.php"),
     );
     request.fields.addAll({
       "id": widget.item.id.toString(),
@@ -65,35 +68,39 @@ class _DetailsState extends State<Details> {
     var response = await request.send();
 
     if (response.statusCode == 200) {
-      var res = json.decode(await response.stream.bytesToString());
-      if (res["error"]) {
+      var resOr = await response.stream.bytesToString();
+      print(resOr);
+      if (resOr.contains("Cannot delete or update a parent row")) {
         Fluttertoast.showToast(
-            msg: res["message"],
+            msg: "يوجد بيانات مضافة على التصنيف",
             toastLength: Toast.LENGTH_LONG,
             gravity: ToastGravity.TOP_RIGHT,
             backgroundColor: Colors.red,
             textColor: Colors.white,
             fontSize: 16.0);
       } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => kIsWeb
-                ? WebFragment(
-              selectedIndex: 1,
-            )
-                : MobileFragment(
-              selectedIndex: 1,
-            ),
-          ),
-        );
-        Fluttertoast.showToast(
-            msg: res["message"],
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.TOP_RIGHT,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
+        var res = json.decode(resOr);
+        if (res["error"]) {
+          Fluttertoast.showToast(
+              msg: res["message"],
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP_RIGHT,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0);
+        } else {
+          Navigator.pop(
+            context,
+            "done",
+          );
+          Fluttertoast.showToast(
+              msg: res["message"],
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.TOP_RIGHT,
+              backgroundColor: Colors.red,
+              textColor: Colors.white,
+              fontSize: 16.0);
+        }
       }
     } else {
       Fluttertoast.showToast(
@@ -104,22 +111,22 @@ class _DetailsState extends State<Details> {
     }
   }
 
+
+  void EditFunc() async {
+    final result = await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => EditAssetsCategory(item: widget.item)));
+    if (result == "done") {
+      Navigator.pop(context, "done");
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    List<Maintaince> listMaintainces =
-        widget.item.mainainces != null ? widget.item.mainainces! : [];
-    List<Widget> mainainces = listMaintainces
-        .map((item) => MaintainceItem(
-              maintaince: item,
-              machine: widget.item,
-            ))
-        .toList();
     List<Widget> detailsContent = [
       Expanded(
         flex: kIsWeb ? 2 : 1,
         child: Container(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Align(
                 alignment: AlignmentDirectional.topEnd,
@@ -139,43 +146,12 @@ class _DetailsState extends State<Details> {
               ),
               Align(
                 alignment: AlignmentDirectional.topEnd,
-                child: Text(
-                  widget.item.brand == null ? "الماركة" : " الماركة : "+ widget.item.brand!,
-                  textAlign: TextAlign.right,textDirection: TextDirection.rtl,
-                  style: const TextStyle(
-                    color: Color(0xFF475467),
-                    fontSize: 14,
-                    fontFamily: 'santo',
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.10,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Align(
-                alignment: AlignmentDirectional.topEnd,
-                child: Text(
-                  widget.item.code == null ? "الرقم التعريفي" :   " الرقم التعريفي : "+widget.item.code!,
-                  textAlign: TextAlign.right,textDirection: TextDirection.rtl,
-                  style: const TextStyle(
-                    color: Color(0xFF475467),
-                    fontSize: 14,
-                    fontFamily: 'santo',
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.10,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Align(
-                alignment: AlignmentDirectional.topEnd,
                 child: Container(
-                  width: 150,
+                  width: 230,
                   decoration: ShapeDecoration(
+                    color: widget.item.forRent == "true"
+                        ? Colors.green
+                        : Color(0xFF475467),
                     shape: RoundedRectangleBorder(
                       side:
                           const BorderSide(width: 2, color: Color(0x14344054)),
@@ -183,79 +159,24 @@ class _DetailsState extends State<Details> {
                     ),
                   ),
                   padding: EdgeInsets.all(15),
-                  child: StatusItem(
-                    state: widget.item.status,
-                  ),
-                ),
-              ), const SizedBox(
-                height: 15,
-              ),
-              Align(
-                alignment: AlignmentDirectional.topEnd,
-                child: Container(
-                  width: 230,
-                  decoration: ShapeDecoration(color: Color(0xFF475467),
-                    shape: RoundedRectangleBorder(
-                      side:
-                      const BorderSide(width: 2, color: Color(0x14344054)),
-                      borderRadius: BorderRadius.circular(21),
-                    ),
-                  ),
-                  padding: EdgeInsets.all(15),
-                  child: Text( "اجمالي تكلفة الصيانة : " + widget.item.total_maintance_cost.toString() , textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl, style: const TextStyle(
+                  child: Text(
+                    widget.item.forRent == "true"
+                        ? "  متاح للتاجير : متاح" : "  متاح للتاجير : غير متاح"   ,
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontFamily: 'santo',
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.10,
-                    ),),
-                ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Align(
-                alignment: AlignmentDirectional.topEnd,
-                child: Container(
-                  width: 230,
-                  decoration: ShapeDecoration(color: Color(0xFF475467),
-                    shape: RoundedRectangleBorder(
-                      side:
-                      const BorderSide(width: 2, color: Color(0x14344054)),
-                      borderRadius: BorderRadius.circular(21),
                     ),
                   ),
-                  padding: EdgeInsets.all(15),
-                  child: Text( "قيمة المولد : " + widget.item.machine_value.toString() + " ريال " , textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl, style: const TextStyle(
-                      color:Colors.white,
-                      fontSize: 14,
-                      fontFamily: 'santo',
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.10,
-                    ),),
                 ),
               ),
               const SizedBox(
                 height: 15,
               ),
-              widget.item.rent != null
-                  ? ClientRentItem(
-                      rent: widget.item.rent!,
-                    )
-                  : kIsWeb
-                      ? const SizedBox(
-                          height: 100,
-                        )
-                      : const SizedBox(),
-              kIsWeb
-                  ? const SizedBox()
-                  : const SizedBox(
-                      height: 10,
-                    ),
-              getMachineStatus(
-                  widget.item.lastMaintaince!, widget.item.maintainceEvery, widget.item.status),
             ],
           ),
         ),
@@ -266,8 +187,10 @@ class _DetailsState extends State<Details> {
       Expanded(
         flex: kIsWeb ? 1 : 0,
         child: Stack(
-          children: [ Container(
-              height: 380,width: MediaQuery.of(context).size.width,
+          children: [
+            Container(
+              height: 380,
+              width: MediaQuery.of(context).size.width,
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(width: 0.50, color: Color(0xFFD0D5DD)),
@@ -276,7 +199,7 @@ class _DetailsState extends State<Details> {
               ),
               padding: EdgeInsets.all(10),
               child: CachedNetworkImage(
-                imageUrl: widget.item.imageUrl ??
+                imageUrl: widget.item.image ??
                     "https://media.istockphoto.com/id/182192586/photo/portable-electric-generator.jpg?s=612x612&w=0&k=20&c=xQzHBE_g29RdGV-AZbqek0JQzHifxOD-z3lExi1MfDs=",
                 fit: BoxFit.fill,
               ),
@@ -292,7 +215,7 @@ class _DetailsState extends State<Details> {
                       borderRadius: BorderRadius.circular(4)),
                 ),
                 child: Text(
-                  "#${widget.item.serial.toString()}",
+                  "#${widget.item.id.toString()}",
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -313,7 +236,7 @@ class _DetailsState extends State<Details> {
       children: [
         SubHeader(
           item: widget.item,
-          Delete: Delete,
+          Delete: Delete,Edit: EditFunc
         ),
         Expanded(
           child: Container(
@@ -357,26 +280,6 @@ class _DetailsState extends State<Details> {
                                       children: detailsContent,
                                     ),
                             ),
-                            mainainces.length>0 ?const Align(
-                              alignment: AlignmentDirectional.topEnd,
-                              child: Text(
-                                'تاريخ الصيانة',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  color: Color(0xFF1A1A24),
-                                  fontSize: 16,
-                                  fontFamily: 'santo',
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.15,
-                                ),
-                              ),
-                            ):SizedBox(),
-                            Expanded(
-                              flex: kIsWeb?1:0,
-                              child: Column(
-                                children: mainainces,
-                              ),
-                            )
                           ],
                         ),
                       ),
@@ -394,9 +297,10 @@ class _DetailsState extends State<Details> {
 
 class SubHeader extends StatefulWidget {
   final Function Delete;
-  final Machine item;
+  final Function Edit;
+  final AssetsCategory item;
 
-  const SubHeader({Key? key, required this.Delete, required this.item})
+  const SubHeader({Key? key, required this.Delete, required this.Edit, required this.item})
       : super(key: key);
 
   @override
@@ -415,8 +319,8 @@ class _SubHeaderState extends State<SubHeader> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text(
-                'تفاصيل المنتج',
+              Text(
+                'تفاصيل التصنيف (${widget.item.name})',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: Colors.white,
@@ -444,16 +348,10 @@ class _SubHeaderState extends State<SubHeader> {
             child: Row(
               children: [
                 subHeaderButton(
-                  kIsWeb ? 'تعديل المنتج' : '',
+                  kIsWeb ? 'تعديل التصنيف' : '',
                   PhosphorIcons.pencil_simple,
                   () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => EditMachine(
-                                  item: widget.item,
-                                  rent: widget.item.rent,
-                                )));
+                   widget.Edit();
                   },
                   color: const Color.fromRGBO(205, 230, 244, 1),
                 ),
@@ -469,23 +367,10 @@ class _SubHeaderState extends State<SubHeader> {
                       context: context,
                       builder: (context) {
                         return CustomAlertDialog(
-                          title: "هل انت متأكد من رغبتك في حذف المنتج",
+                          title: "هل انت متأكد من رغبتك في حذف التصنيف",
                           description: "لن تستطيع اعادته مرة أخرى",
                           onConfirm: () {
                             widget.Delete();
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => kIsWeb
-                                    ? WebFragment(
-                                  selectedIndex: 1,
-                                )
-                                    : MobileFragment(
-                                  selectedIndex: 1,
-                                ),
-                              ),
-                            );
-
                           },
                         );
                       },

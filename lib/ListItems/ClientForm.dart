@@ -12,12 +12,8 @@ import 'package:om_united/Components/ImageDragged.dart';
 import 'package:om_united/Components/Widgets.dart';
 import 'package:om_united/ListItems/MachineCategoryItem.dart';
 import 'package:om_united/Model/MachineCategories.dart';
-import 'package:om_united/Pages/InventoryPage.dart';
+import 'package:om_united/Pages/Inventory.dart';
 import 'package:om_united/utilis/Utilis.dart';
-import 'package:path/path.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../Components/CustomAlertDialog.dart';
-import '../Components/Header.dart';
 import 'package:http/http.dart' as http;
 
 import '../Model/ClientsModel.dart';

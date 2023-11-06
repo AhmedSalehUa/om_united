@@ -25,7 +25,7 @@ class _AlertMaintainceItemState extends State<AlertMaintainceItem> {
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Directionality(
           textDirection: TextDirection.rtl,
-          child: getMachineStatus(widget.machine.lastMaintaince!, widget.machine.maintainceEvery),
+          child: getMachineStatus(widget.machine.lastMaintaince!, widget.machine.maintainceEvery, widget.machine.status),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

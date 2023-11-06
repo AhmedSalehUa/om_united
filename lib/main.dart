@@ -8,16 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:om_united/Authentications/Login.dart';
-import 'package:om_united/Model/Machine.dart';
-import 'package:om_united/Pages/AddMachineCategory.dart';
-import 'package:om_united/Pages/InventoryPage.dart';
-import 'package:om_united/Pages/MachineDetails.dart';
-import 'package:om_united/Pages/MainFragmnet.dart';
 import 'package:om_united/utilis/Firebase_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Model/User.dart';
-import 'Pages/AddMachine.dart';
-import 'Pages/HomePage.dart';
+import 'Fragments/MobileFragment.dart';
+import 'Fragments/WebFragment.dart';
 import 'firebase_options.dart';
 import '../Model/User.dart' as LocalUser;
 
@@ -72,7 +66,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'OM United',
       debugShowCheckedModeBanner: false,
-      home: getHome(user.email,  pass ,user),
+      home:getHome(user.email,  pass ,user),
     );
   }
 }
@@ -84,7 +78,7 @@ Widget getHome(email, pass,LocalUser.User user) {
           .signInWithEmailAndPassword(email: email, password: pass);
     } catch (rx) {}
 
-    return   MainFragmnet(subHeader: SizedBox(), content: SizedBox(), isMainWidget: false,user: user );
+    return  kIsWeb ? WebFragment(): MobileFragment();
   } else {
     print("not logged");
     return Login();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:om_united/Pages/HomePage.dart';
+import 'package:om_united/Pages/Home.dart';
 
 class BottomNavigator extends StatefulWidget {
   @override
@@ -13,7 +13,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
   static const TextStyle optionStyle =
   TextStyle(fontSize: 30, fontWeight: FontWeight.w600);
   static const List<Widget> _widgetOptions = <Widget>[
-    HomePage() ,
+    Home() ,
     Text(
       'Likes',
       style: optionStyle,

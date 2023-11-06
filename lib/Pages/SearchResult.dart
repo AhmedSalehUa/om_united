@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
-import 'package:om_united/Components/Header.dart';
 import 'package:om_united/ListItems/MachineItem.dart';
 import 'package:om_united/Components/Widgets.dart';
 import 'package:om_united/Model/Machine.dart';
@@ -13,8 +12,8 @@ import 'package:om_united/Pages/MachineDetails.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:om_united/SubHeader/SearchResultSubHeader.dart';
+import '../Fragments/MiniFragmnet.dart';
 import '../utilis/Utilis.dart';
-import 'MainFragmnet.dart';
 
 class SearchResult extends StatefulWidget {
   final String SearchKey;
@@ -30,38 +29,19 @@ class _SearchResultPage extends State<SearchResult> {
   @override
   Widget build(BuildContext context) {
     // return InventoryPageContent(onChanged: _updateChildWidgetState);
-    return  Scaffold(
-      resizeToAvoidBottomInset: true,
-      body:  Container(
-        decoration: const BoxDecoration(
-          color: Color.fromRGBO(26, 26, 36, 1),
-          image: DecorationImage(
-            image: AssetImage("assets/images/ContainerBackground.png"),
-            fit: BoxFit.cover,
-          ),
+    return   MiniFragmnet(
+      content:  Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [ 
+          SearchResultSubHeader(
+          searchText: widget.SearchKey,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Header(isMain: false),
-            SearchResultSubHeader(
-            searchText: widget.SearchKey,
-          ),
-            SearchResultContent(SearchKey: widget.SearchKey,),
-          ],
-        ),
-      ),
+          SearchResultContent(SearchKey: widget.SearchKey,),
+        ],
+    ))
 
-    ) ;
-    MainFragmnet(
-      user: widget.user,
-      isMainWidget: false,
-      subHeader: SearchResultSubHeader(
-       searchText: widget.SearchKey,
-      ),
-      content: SearchResultContent(SearchKey: widget.SearchKey,),
-    );
+      ;
   }
 }
 
@@ -87,9 +67,12 @@ class _SearchResultContent extends State<SearchResultContent> {
             'Content-Type': 'application/json',
             'Accept': '*/*'
           });
-      final jsonData = jsonDecode(response.body);
+      print(response.body)
+;      final jsonData = jsonDecode(response.body);
+
+      var dataJson = jsonData["data"];
       final List<Machine> items = [];
-      for (var itemJson in jsonData) {
+      for (var itemJson in jsonData["data"]) {
         final item = Machine.fromJson(itemJson);
         items.add(item);
       }
@@ -108,100 +91,102 @@ class _SearchResultContent extends State<SearchResultContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 0.50, color: Color(0x14344054)),
-          borderRadius: BorderRadius.circular(21),
+    return Expanded(
+      child: Container(
+        decoration: ShapeDecoration(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            side: const BorderSide(width: 0.50, color: Color(0x14344054)),
+            borderRadius: BorderRadius.circular(21),
+          ),
         ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              listFilter("المعطل", PhosphorIcons.link_break, () {
-                setState(() {
-                  selectedFilter = "crashed";  _futureItems = fetchData();
-                });
-              }, selectedFilter == "crashed"),
-              const SizedBox(
-                width: 10,
-              ),
-              listFilter("المؤجر", PhosphorIcons.identification_badge,
-                      () {
-                    setState(() {
-                      selectedFilter = "rents";  _futureItems = fetchData();
-                    });
-                  }, selectedFilter == "rents"),
-              const SizedBox(
-                width: 10,
-              ),
-              listFilter("فى المخزن", PhosphorIcons.storefront, () {
-                setState(() {
-                  selectedFilter = "inventory";  _futureItems = fetchData();
-                });
-              }, selectedFilter == "inventory"),
-              const SizedBox(
-                width: 10,
-              ),
-              listFilter("الكل", PhosphorIcons.cube, () {
-                setState(() {
-                  selectedFilter = "all"; _futureItems = fetchData();
-                });
-              }, selectedFilter == "all"),
-            ],
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * .6,
-            child: FutureBuilder<List<Machine>>(
-              future: _futureItems,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final items = snapshot.data!;
-                  return GridView.builder(
-                    itemCount: items.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount:
-                        MediaQuery.of(context).size.width ~/ 280,
-                        crossAxisSpacing: 90,
-                        mainAxisSpacing: 30),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MachineDetails(
-                                    item: item,
-                                  )));
-                        },
-                        child: MachineItems(
-                          state: item.status,
-                          name: item.name,
-                          id: "#${item.serial}",
-                          imageUrl:
-                          item.imageUrl != null ? item.imageUrl! : "",
-                        ),
-                      );
-                    },
-                  );
-                } else if (snapshot.hasError) {
-                  return Text("${snapshot.error}");
-                }
-                return Center(child: CircularProgressIndicator());
-              },
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                listFilter("المعطل", PhosphorIcons.link_break, () {
+                  setState(() {
+                    selectedFilter = "crashed";  _futureItems = fetchData();
+                  });
+                }, selectedFilter == "crashed"),
+                const SizedBox(
+                  width: 10,
+                ),
+                listFilter("المؤجر", PhosphorIcons.identification_badge,
+                        () {
+                      setState(() {
+                        selectedFilter = "rents";  _futureItems = fetchData();
+                      });
+                    }, selectedFilter == "rents"),
+                const SizedBox(
+                  width: 10,
+                ),
+                listFilter("فى المخزن", PhosphorIcons.storefront, () {
+                  setState(() {
+                    selectedFilter = "inventory";  _futureItems = fetchData();
+                  });
+                }, selectedFilter == "inventory"),
+                const SizedBox(
+                  width: 10,
+                ),
+                listFilter("الكل", PhosphorIcons.cube, () {
+                  setState(() {
+                    selectedFilter = "all"; _futureItems = fetchData();
+                  });
+                }, selectedFilter == "all"),
+              ],
             ),
+            const SizedBox(
+              height: 16,
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * .6,
+              child: FutureBuilder<List<Machine>>(
+                future: _futureItems,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final items = snapshot.data!;
+                    return GridView.builder(
+                      itemCount: items.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount:
+                          MediaQuery.of(context).size.width ~/ 280,
+                          crossAxisSpacing: 90,
+                          mainAxisSpacing: 30),
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MachineDetails(
+                                      item: item,
+                                    )));
+                          },
+                          child: MachineItems(
+                            state: item.status,
+                            name: item.name,
+                            id: "#${item.serial}",
+                            imageUrl:
+                            item.imageUrl != null ? item.imageUrl! : "",
+                          ),
+                        );
+                      },
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
+                  return Center(child: CircularProgressIndicator());
+                },
+              ),
 
-          )
+            )
 
-        ],
+          ],
+        ),
       ),
     );
   }

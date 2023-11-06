@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:om_united/ListItems/UserForm.dart';
-import 'package:om_united/Pages/HomePage.dart';
+import 'package:om_united/Pages/Home.dart';
 import 'package:popover/popover.dart';
 
 import '../Components/CustomAlertDialog.dart';
@@ -119,7 +119,7 @@ class _UserItemState extends State<UserItem> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const HomePage()));
+                                builder: (context) => const Home()));
                         Fluttertoast.showToast(
                             msg: res["message"],
                             toastLength: Toast.LENGTH_LONG,

@@ -65,7 +65,8 @@ Directionality splittedTextField(
   return Directionality(
       textDirection: TextDirection.rtl,
       child: Row(
-        mainAxisAlignment: kIsWeb ?MainAxisAlignment.start:MainAxisAlignment.spaceBetween,
+        mainAxisAlignment:
+            kIsWeb ? MainAxisAlignment.start : MainAxisAlignment.spaceBetween,
         children: [
           Text(
             frist,
@@ -499,4 +500,96 @@ Align getStatusMenu(
       ),
     ),
   );
+}
+
+Align getCategoryStatusMenu(
+    Function onChange, Function onSaved, String? selectedValue) {
+  const List<String> list = <String>["true", "false"];
+  return Align(
+    alignment: AlignmentDirectional.topEnd,
+    child: SizedBox(
+      width: 170,
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: DropdownButtonFormField2<String>(
+          isExpanded: true,
+          buttonStyleData: ButtonStyleData(
+            height: 50,
+            width: 160,
+            padding: const EdgeInsets.only(left: 14, right: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: Color.fromRGBO(208, 213, 221, 1),
+              ),
+              color: const Color.fromRGBO(249, 250, 251, 1),
+            ),
+          ),
+          decoration: const InputDecoration(
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.white,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.white,
+              ),
+            ),
+            border: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.white,
+              ),
+            ),
+          ),
+          hint: const Text(
+            'اختر',
+            style: TextStyle(
+              color: Color(0xFF475467),
+              fontSize: 12,
+              fontFamily: 'santo',
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.50,
+            ),
+          ),
+          items: list.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: CategoryStatusItem(
+                value,
+              ),
+            );
+          }).toList(),
+          value: selectedValue,
+          validator: (value) {
+            if (value == null) {
+              return 'اختر';
+            }
+            return null;
+          },
+          onChanged: (value) => {onChange(value)},
+          onSaved: (value) => {onSaved(value)},
+          iconStyleData: IconStyleData(
+            icon: Icon(
+              PhosphorIcons.caret_down,
+              color: selectedValue?.isEmpty ?? true
+                  ? const Color.fromRGBO(152, 162, 179, 1)
+                  : const Color.fromRGBO(249, 250, 251, 1),
+            ),
+            iconSize: 18,
+          ),
+          dropdownStyleData: DropdownStyleData(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget CategoryStatusItem(String value) {
+  return Text(value == "true" ? "متاح" : "غير متاح");
 }

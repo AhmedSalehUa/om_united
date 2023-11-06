@@ -30,7 +30,8 @@ class _NotificationItemState extends State<NotificationItem> {
             ? Directionality(
                 textDirection: TextDirection.rtl,
                 child: getMachineStatus(widget.machine.lastMaintaince!,
-                    widget.machine.maintainceEvery),
+                    widget.machine.maintainceEvery,
+                    widget.machine.status),
               )
             : SizedBox(),
         Expanded( 

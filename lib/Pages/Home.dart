@@ -6,25 +6,23 @@ import 'package:om_united/ListItems/AlertMaintainceItem.dart';
 import 'package:om_united/Model/Machine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Components/Header.dart';
 import '../utilis/Utilis.dart';
-import 'MainFragmnet.dart';
 import '../SubHeader/MainPageSubHeader.dart';
 import 'package:http/http.dart' as http;
 import 'package:om_united/Model/User.dart';
 
-import 'MaintaincePage.dart';
+import 'Maintaince.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<Home> createState() => _HomeState();
 }
 
 String UserName = "";
 
-class _HomePageState extends State<HomePage> {
+class _HomeState extends State<Home> {
   Future<String> Initialize() async {
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -77,11 +75,6 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          kIsWeb
-              ? Header(
-            isMain: true,
-          )
-              : SizedBox(),
           MainPageSubHeader(
             name: UserName,
           ),
@@ -104,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                 child: CustomScrollView(
                   slivers: [
                     SliverFillRemaining(
-                        hasScrollBody: false, child:HomePageContent())
+                        hasScrollBody: false, child:HomeContent())
                   ],
                 ),
               ),
@@ -113,25 +106,17 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
-    MainFragmnet(
-      selectedIndex: 0,
-      isMainWidget: true,
-      subHeader: MainPageSubHeader(
-        name: UserName,
-      ),
-      content: HomePageContent(),
-    );
   }
 }
 
-class HomePageContent extends StatefulWidget {
-  const HomePageContent({Key? key}) : super(key: key);
+class HomeContent extends StatefulWidget {
+  const HomeContent({Key? key}) : super(key: key);
 
   @override
-  State<HomePageContent> createState() => _HomePageContentState();
+  State<HomeContent> createState() => _HomeContentState();
 }
 
-class _HomePageContentState extends State<HomePageContent> {
+class _HomeContentState extends State<HomeContent> {
   List<Machine> _lateMaintaince = [];
   List<Machine> _soonMaintaince = [];
 
@@ -146,21 +131,21 @@ class _HomePageContentState extends State<HomePageContent> {
           });
       final jsonData = jsonDecode(response.body);
       final List<Machine> lateMaibntaince = [];
-
-      for (var itemJson in jsonData['late']) {
+      var dataJson = jsonData["data"];
+      for (var itemJson in dataJson['late']) {
         final item = Machine.fromJson(itemJson);
         lateMaibntaince.add(item);
       }
 
       final List<Machine> sonnMaintaince = [];
-      for (var itemJson in jsonData['soon']) {
+      for (var itemJson in dataJson['soon']) {
         final item = Machine.fromJson(itemJson);
         sonnMaintaince.add(item);
       }
       int numOfInventoryI =0;
       int numOfCrashedI = 0;
       int numOfRentsI =   0;
-      jsonData['statics'].forEach((e){
+      dataJson['statics'].forEach((e){
         numOfInventoryI = e["1"]!=null?int.parse(e["1"]):numOfInventoryI;
         numOfCrashedI = e["2"]!=null?int.parse(e["2"]):numOfCrashedI;
         numOfRentsI = e["3"]!=null?int.parse(e["3"]):numOfRentsI;
@@ -559,24 +544,3 @@ class _HomePageContentState extends State<HomePageContent> {
           );
   }
 }
-// SizedBox(
-// height: (_lateMaintaince.length * 80),
-// child: Column(
-// children: _lateMaintaince
-//     .map((e) => GestureDetector(
-// onTap: () {
-// Navigator.push(
-// context,
-// MaterialPageRoute(
-// builder: (context) => MaintaincePage(
-// item: e,
-// )));
-// },
-// child: ListTile(
-// title: AlertMaintainceItem(
-// machine: e),
-// ),
-// ))
-// .toList(),
-// ),
-// ),

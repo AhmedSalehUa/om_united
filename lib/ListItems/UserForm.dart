@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:om_united/Pages/HomePage.dart';
+import 'package:om_united/Pages/Home.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -153,7 +153,7 @@ class _UserFormState extends State<UserForm> {
                   .then((value) => {/*print(value)*/});
             }
             Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => const HomePage()));
+                MaterialPageRoute(builder: (context) => const Home()));
             Fluttertoast.showToast(
                 msg: res["message"],
                 toastLength: Toast.LENGTH_LONG,

@@ -7,23 +7,21 @@ import 'package:om_united/Model/Machine.dart';
 import 'package:om_united/Model/User.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Components/Header.dart';
 import '../ListItems/NotificationItem.dart';
 import '../utilis/Utilis.dart';
-import 'MainFragmnet.dart';
 import '../SubHeader/MainPageSubHeader.dart';
 import 'package:http/http.dart' as http;
 
-import 'MaintaincePage.dart';
+import 'Maintaince.dart';
 
-class NotificationsPage extends StatefulWidget {
-  const NotificationsPage({Key? key}) : super(key: key);
+class Notifications extends StatefulWidget {
+  const Notifications({Key? key}) : super(key: key);
 
   @override
-  State<NotificationsPage> createState() => _NotificationsPageState();
+  State<Notifications> createState() => _NotificationsState();
 }
 
-class _NotificationsPageState extends State<NotificationsPage> {
+class _NotificationsState extends State<Notifications> {
   String numOfNotifictaions = "";
 
   void setNumber(num) {
@@ -46,12 +44,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          kIsWeb
-              ? Header(
-                  isMain: false,
-                )
-              : SizedBox(),
-          NotificationsPageSubHeader(numOfNotifictaions: numOfNotifictaions),
+          NotificationsSubHeader(numOfNotifictaions: numOfNotifictaions),
           Expanded(
             child: Container(
               margin: const EdgeInsets.all(0),
@@ -71,7 +64,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   slivers: [
                     SliverFillRemaining(
                         hasScrollBody: false,
-                        child: NotificationsPageContent(
+                        child: NotificationsContent(
                           setNum: setNumber,
                         ))
                   ],
@@ -82,29 +75,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ],
       ),
     );
-    MainFragmnet(
-      selectedIndex: 2,
-      isMainWidget: true,
-      subHeader:
-          NotificationsPageSubHeader(numOfNotifictaions: numOfNotifictaions),
-      content: NotificationsPageContent(
-        setNum: setNumber,
-      ),
-    );
   }
 }
 
-class NotificationsPageContent extends StatefulWidget {
+class NotificationsContent extends StatefulWidget {
   final Function(String)? setNum;
 
-  const NotificationsPageContent({Key? key, this.setNum}) : super(key: key);
+  const NotificationsContent({Key? key, this.setNum}) : super(key: key);
 
   @override
-  State<NotificationsPageContent> createState() =>
-      _NotificationsPageContentState();
+  State<NotificationsContent> createState() =>
+      _NotificationsContentState();
 }
 
-class _NotificationsPageContentState extends State<NotificationsPageContent> {
+class _NotificationsContentState extends State<NotificationsContent> {
   List<Machine> _notificationList = [];
   List<Machine> _rentSoonList = [];
 
@@ -121,15 +105,15 @@ class _NotificationsPageContentState extends State<NotificationsPageContent> {
           });
       final jsonData = jsonDecode(response.body);
       final List<Machine> lateMaibntaince = [];
-
-      for (var itemJson in jsonData['notifications']) {
+      var dataJS = jsonData["data"];
+      for (var itemJson in dataJS['notifications']) {
         final item = Machine.fromJson(itemJson);
         lateMaibntaince.add(item);
       }
 
       final List<Machine> rentSoon = [];
 
-      for (var itemJson in jsonData['rentSoon']) {
+      for (var itemJson in dataJS['rentSoon']) {
         final item = Machine.fromJson(itemJson);
         rentSoon.add(item);
       }
@@ -248,19 +232,19 @@ class _NotificationsPageContentState extends State<NotificationsPageContent> {
   }
 }
 
-class NotificationsPageSubHeader extends StatefulWidget {
+class NotificationsSubHeader extends StatefulWidget {
   final String numOfNotifictaions;
 
-  const NotificationsPageSubHeader({Key? key, required this.numOfNotifictaions})
+  const NotificationsSubHeader({Key? key, required this.numOfNotifictaions})
       : super(key: key);
 
   @override
-  State<NotificationsPageSubHeader> createState() =>
-      _NotificationsPageSubHeaderState();
+  State<NotificationsSubHeader> createState() =>
+      _NotificationsSubHeaderState();
 }
 
-class _NotificationsPageSubHeaderState
-    extends State<NotificationsPageSubHeader> {
+class _NotificationsSubHeaderState
+    extends State<NotificationsSubHeader> {
   @override
   Widget build(BuildContext context) {
     return Container(

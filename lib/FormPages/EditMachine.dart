@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,52 +12,57 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:om_united/Components/DatePicker.dart';
 import 'package:om_united/Components/ImageDragged.dart';
 import 'package:om_united/Components/Widgets.dart';
-import 'package:om_united/ListItems/MachineCategoryItem.dart';
-import 'package:om_united/Pages/AddMachineCategory.dart';
-import 'package:om_united/Pages/InventoryPage.dart';
-import 'package:om_united/utilis/Utilis.dart';
+import 'package:om_united/Model/Rent.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Components/Header.dart';
 import '../Components/MultipleImageDragged.dart';
+import '../Fragments/MobileFragment.dart';
+import '../Fragments/WebFragment.dart';
 import '../ListItems/ClientDropDown.dart';
-import '../Model/MachineCategories.dart';
-import 'AddClientTemp.dart';
-import 'MainFragmnet.dart';
-import 'MiniFragmnet.dart';
-import 'package:http/http.dart' as http;
+import '../ListItems/MachineCategoryItem.dart';
+import '../Model/Machine.dart';
+import '../utilis/Utilis.dart';
+import 'AddMachineCategory.dart';
+import '../Fragments/MiniFragmnet.dart';
 
-class AddMachine extends StatefulWidget {
-  const AddMachine({Key? key}) : super(key: key);
+class EditMachine extends StatefulWidget {
+  final Machine item;
+  final Rent? rent;
+
+  const EditMachine({Key? key, required this.item, this.rent})
+      : super(key: key);
 
   @override
-  State<AddMachine> createState() => _AddMachineState();
+  State<EditMachine> createState() => _EditMachineState();
 }
 
-class _AddMachineState extends State<AddMachine> {
+class _EditMachineState extends State<EditMachine> {
   @override
   Widget build(BuildContext context) {
-    return const MiniFragmnet(
-      content: AddMachineForm(),
+    return MiniFragmnet(
+      content: EditMachineForm(
+        item: widget.item,
+      ),
     );
   }
 }
 
-class AddMachineForm extends StatefulWidget {
-  const AddMachineForm({Key? key}) : super(key: key);
+class EditMachineForm extends StatefulWidget {
+  final Machine item;
+
+  const EditMachineForm({Key? key, required this.item}) : super(key: key);
 
   @override
-  State<AddMachineForm> createState() => _AddMachineFormState();
+  State<EditMachineForm> createState() => _EditMachineFormState();
 }
 
-class _AddMachineFormState extends State<AddMachineForm> {
+class _EditMachineFormState extends State<EditMachineForm> {
   String? selectedValue;
   String? selectedCategory;
   String? selectedClient;
   bool isActive = false;
 
   PlatformFile? _machinePhotos;
-
   List<PlatformFile>? _contractPhotos;
 
   TextEditingController _nameTextController = TextEditingController();
@@ -68,8 +75,43 @@ class _AddMachineFormState extends State<AddMachineForm> {
 
   TextEditingController _dateOfContractTextController = TextEditingController();
   TextEditingController _dateRangTextController = TextEditingController();
-  TextEditingController _costTextController = TextEditingController();
   TextEditingController _notesTextController = TextEditingController();
+  TextEditingController _costTextController = TextEditingController();
+
+  @override
+  void initState() {
+    setState(() {
+      isActive = true;
+      selectedValue = widget.item.status;
+      selectedCategory = widget.item.category.id.toString();
+    });
+    _nameTextController.value = TextEditingValue(text: widget.item.name);
+    _codeTextController.value = TextEditingValue(
+        text: widget.item.code != null ? widget.item.code! : "");
+    _brandTextController.value = TextEditingValue(
+        text: widget.item.brand != null ? widget.item.brand! : "");
+    _maintanceEverTextController.value =
+        TextEditingValue(text: widget.item.maintainceEvery!);
+    _totalMaintanceCostTextController.value =
+        TextEditingValue(text: widget.item.total_maintance_cost!);
+    _macineValueTextController.value =
+        TextEditingValue(text: widget.item.machine_value!);
+
+    if (widget.item.rent != null) {
+      _dateOfContractTextController.value =
+          TextEditingValue(text: widget.item.rent!.date);
+      _dateRangTextController.value =
+          TextEditingValue(text: widget.item.rent!.dateTo);
+      _notesTextController.value =
+          TextEditingValue(text: widget.item.rent!.notes!);
+      _costTextController.value = TextEditingValue(
+          text: widget.item.rent!.cost != null ? widget.item.rent!.cost! : "0");
+      setState(() {
+        selectedClient = widget.item.rent!.client!.id.toString();
+      });
+    }
+    super.initState();
+  }
 
   void setMachineImage(PlatformFile machinePhotos) {
     setState(() {
@@ -81,28 +123,13 @@ class _AddMachineFormState extends State<AddMachineForm> {
     _contractPhotos = imgs;
   }
 
-  int getStatusID(String value) {
-    switch (value) {
-      case "inventory":
-        return 1;
-      case "crashed":
-        return 2;
-      case "rents":
-        return 3;
-    }
-    return 1;
-  }
-
   late Response response;
   late String progress = "";
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // print("idget.item!.rent!.attachments!.length>0");
+    // print(widget.item!.rent == null);
     List<Widget> catRow = [
       subHeaderButton('', PhosphorIcons.plus_circle, () {
         Navigator.push(
@@ -113,18 +140,17 @@ class _AddMachineFormState extends State<AddMachineForm> {
       Row(
         children: [
           MachineCategoryItem(
-            onChange: (value) {
-              setState(() {
-                selectedCategory = value.toString();
-              });
-            },
-            onSave: (value) {
-              setState(() {
-                selectedCategory = value.toString();
-              });
-            },
-            initialValue: "",
-          ),
+              onChange: (value) {
+                setState(() {
+                  selectedCategory = value.toString();
+                });
+              },
+              onSave: (value) {
+                setState(() {
+                  selectedCategory = value.toString();
+                });
+              },
+              initialValue: selectedCategory == null ? "" : selectedCategory!),
           kIsWeb
               ? Text(
                   "الفئة",
@@ -142,149 +168,172 @@ class _AddMachineFormState extends State<AddMachineForm> {
     ];
     Future<void> Submit() async {
       if (_nameTextController.text != "" &&
+          _maintanceEverTextController.text != "" &&
           _macineValueTextController != "" &&
-          _maintanceEverTextController != "" &&
-          selectedValue != "" &&
-          selectedCategory != "") {
-        context.loaderOverlay.show();
-
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        var request = http.MultipartRequest(
-          "POST",
-          Uri.parse("${URL_PROVIDER()}/Machines.php"),
-        );
-        if (kIsWeb) {
-          if (selectedValue == "3") {
-            if (_contractPhotos != null) {
-              for (var i = 0; i < _contractPhotos!.length; i++) {
-                request.files.add(
-                  http.MultipartFile.fromBytes(
-                    "rent_file$i",
-                    _contractPhotos![i].bytes!,
-                    filename: _contractPhotos![i].name,
-                  ),
-                );
-              }
-            }
-          }
-          request.files.add(
-            http.MultipartFile.fromBytes(
-              "file",
-              _machinePhotos!.bytes!,
-              filename: _machinePhotos!.name,
-            ),
+          selectedCategory != null) {
+        if (selectedValue == "3" && selectedClient == null) {
+          Fluttertoast.showToast(
+            msg: "بيانات فارغة",
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
           );
         } else {
-          if (selectedValue == "3") {
-            if (_contractPhotos != null) {
-              for (var i = 0; i < _contractPhotos!.length; i++) {
-                request.files.add(
-                  await http.MultipartFile.fromPath(
-                    "rent_file$i",
-                    _contractPhotos![i].path!,
-                    filename: basename(_contractPhotos![i].path!),
-                  ),
-                );
+          context.loaderOverlay.show();
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          var request = http.MultipartRequest(
+            "POST",
+            Uri.parse("${URL_PROVIDER()}/Machines.php"),
+          );
+          if (kIsWeb) {
+            if (selectedValue == "3") {
+              if (_contractPhotos != null) {
+                for (var i = 0; i < _contractPhotos!.length; i++) {
+                  request.files.add(
+                    http.MultipartFile.fromBytes(
+                      "rent_file$i",
+                      _contractPhotos![i].bytes!,
+                      filename: _contractPhotos![i].name,
+                    ),
+                  );
+                }
               }
             }
-          }
-          request.files.add(
-            await http.MultipartFile.fromPath(
-              "file",
-              _machinePhotos!.path!,
-              filename: basename(_machinePhotos!.path!),
-            ),
-          );
-        }
-
-        if (selectedValue == "3") {
-          request.fields.addAll({
-            "name": _nameTextController.text,
-            "code": _codeTextController.text,
-            "brand": _brandTextController.text,
-            "status": selectedValue == null ? "1" : selectedValue!,
-            "imageNum": _contractPhotos != null
-                ? _contractPhotos!.length.toString()
-                : "0",
-            "category": selectedCategory == null ? "1" : selectedCategory!,
-            "rent_maintance_every": _maintanceEverTextController.text,
-            "total_maintance_cost": _totalMaintanceCostTextController.text,
-            "machine_value": _macineValueTextController.text,
-            "rent_user_id": prefs.getInt("id").toString(),
-            "rent_date_from": _dateOfContractTextController.text,
-            "rent_date_to": _dateRangTextController.text,
-            "rent_notes": _notesTextController.text,
-            "rent_cost": _costTextController.text,
-            "rent_client_id": selectedClient == null ? "1" : selectedClient!,
-          });
-        } else {
-          request.fields.addAll({
-            "name": _nameTextController.text,
-            "code": _codeTextController.text,
-            "brand": _brandTextController.text,
-            "category": selectedCategory == null ? "1" : selectedCategory!,
-            "status": selectedValue == null ? "1" : selectedValue!,
-            "machine_value": _macineValueTextController.text,
-            "rent_maintance_every": _maintanceEverTextController.text,
-            "total_maintance_cost": _totalMaintanceCostTextController.text,
-          });
-        }
-
-        var response = await request.send();
-
-        if (response.statusCode == 200) {
-          context.loaderOverlay.hide();
-          var responseOnce = await response.stream.bytesToString();
-          // print(responseOnce);
-          if (responseOnce.contains("Duplicate entry")) {
-            Fluttertoast.showToast(
-                msg: "المكينة موجودة بالفعل",
-                toastLength: Toast.LENGTH_LONG,
-                gravity: ToastGravity.TOP_RIGHT,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 16.0);
+            if (_machinePhotos != null) {
+              request.files.add(
+                http.MultipartFile.fromBytes(
+                  "file",
+                  _machinePhotos!.bytes!,
+                  filename: _machinePhotos!.name,
+                ),
+              );
+            }
           } else {
-            var res = json.decode(responseOnce);
-            if (res["error"]) {
+            if (selectedValue == "3") {
+              if (_contractPhotos != null) {
+                for (var i = 0; i < _contractPhotos!.length; i++) {
+                  request.files.add(
+                    await http.MultipartFile.fromPath(
+                      "rent_file$i",
+                      _contractPhotos![i].path!,
+                      filename: basename(_contractPhotos![i].path!),
+                    ),
+                  );
+                }
+              }
+            }
+            if (_machinePhotos != null) {
+              request.files.add(
+                await http.MultipartFile.fromPath(
+                  "file",
+                  _machinePhotos!.path!,
+                  filename: basename(_machinePhotos!.path!),
+                ),
+              );
+            }
+          }
+
+          if (selectedValue == "3") {
+            request.fields.addAll({
+              "id": widget.item.id.toString(),
+              "name": _nameTextController.text,
+              "code": _codeTextController.text,
+              "brand": _brandTextController.text,
+              "status": selectedValue == null ? "1" : selectedValue!,
+              "imageNum": _contractPhotos != null
+                  ? _contractPhotos!.length.toString()
+                  : "0",
+              "haveImages": widget.item!.rent != null
+                  ? widget.item!.rent!.attachments!.length.toString()
+                  : "0",
+              "category": selectedCategory == null ? "1" : selectedCategory!,
+              "rent_maintance_every": _maintanceEverTextController.text,
+              "total_maintance_cost": _totalMaintanceCostTextController.text,
+              "machine_value": _macineValueTextController.text,
+              "rent_user_id": prefs.getInt("id").toString(),
+              "rent_date_from": _dateOfContractTextController.text,
+              "rent_date_to": _dateRangTextController.text,
+              "rent_notes": _notesTextController.text,
+              "rent_cost": _costTextController.text,
+              "rent_client_id": selectedClient == null ? "1" : selectedClient!,
+            });
+          } else {
+            request.fields.addAll({
+              "id": widget.item.id.toString(),
+              "name": _nameTextController.text,
+              "code": _codeTextController.text,
+              "brand": _brandTextController.text,
+              "category": selectedCategory == null ? "1" : selectedCategory!,
+              "status": selectedValue == null ? "1" : selectedValue!,
+              "rent_maintance_every": _maintanceEverTextController.text,
+              "total_maintance_cost": _totalMaintanceCostTextController.text,
+              "machine_value": _macineValueTextController.text,
+            });
+          }
+          var response = await request.send();
+
+          if (response.statusCode == 200) {
+            context.loaderOverlay.hide();
+            var responseOnce = await response.stream.bytesToString();
+
+            if (responseOnce.contains("Duplicate entry")) {
+              context.loaderOverlay.hide();
               Fluttertoast.showToast(
-                  msg: res["message"],
+                  msg: "المكينة موجودة بالفعل",
                   toastLength: Toast.LENGTH_LONG,
                   gravity: ToastGravity.TOP_RIGHT,
                   backgroundColor: Colors.red,
                   textColor: Colors.white,
                   fontSize: 16.0);
             } else {
-              Navigator.pushReplacement(
+              context.loaderOverlay.hide();
+              var res = json.decode(responseOnce);
+
+              if (res["error"]) {
+                context.loaderOverlay.hide();
+                Fluttertoast.showToast(
+                    msg: res["message"],
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP_RIGHT,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              } else {
+                context.loaderOverlay.hide();
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => MainFragmnet(
-                          subHeader: SizedBox(),
-                          content: SizedBox(),
-                          isMainWidget: false,
-                          selectedIndex: 1)));
-              Fluttertoast.showToast(
-                  msg: res["message"],
-                  toastLength: Toast.LENGTH_LONG,
-                  gravity: ToastGravity.TOP_RIGHT,
-                  backgroundColor: Colors.red,
-                  textColor: Colors.white,
-                  fontSize: 16.0);
+                    builder: (context) => kIsWeb
+                        ? WebFragment(
+                            selectedIndex: 1,
+                          )
+                        : MobileFragment(
+                            selectedIndex: 1,
+                          ),
+                  ),
+                );
+                Fluttertoast.showToast(
+                    msg: "تم التعديل",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP_RIGHT,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              }
             }
+          } else {
+            context.loaderOverlay.hide();
+            Fluttertoast.showToast(
+              msg: "NetworkError",
+              toastLength: Toast.LENGTH_LONG,
+              gravity: ToastGravity.BOTTOM,
+            );
           }
-        } else {
-          context.loaderOverlay.hide();
-
-          Fluttertoast.showToast(
-            msg: "NetworkError",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-          );
         }
       } else {
+        // print("object");
         Fluttertoast.showToast(
           msg: "بيانات فارغة",
-          toastLength: Toast.LENGTH_SHORT,
+          toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
         );
       }
@@ -323,9 +372,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
                   selectedValue = value.toString();
                 });
               }, (value) {
-                setState(() {
-                  selectedValue = value.toString();
-                });
+                selectedValue = value.toString();
               }, selectedValue),
               selectedValue != "3"
                   ? Text("")
@@ -340,7 +387,9 @@ class _AddMachineFormState extends State<AddMachineForm> {
                                   alignment: AlignmentDirectional.center,
                                   child: MultipleImageDragged(
                                     text: 'صور أو فيديو',
-                                    url: [],
+                                    url: widget.item!.rent != null
+                                        ? widget.item!.rent!.attachments!
+                                        : [],
                                     photos: setContractImage,
                                   ),
                                 ),
@@ -348,17 +397,20 @@ class _AddMachineFormState extends State<AddMachineForm> {
                                   height: 10,
                                 ),
                                 ClientDropDown(
-                                    onChange: (value) {
-                                      setState(() {
-                                        selectedClient = value.toString();
-                                      });
-                                    },
-                                    onSave: (value) {
-                                      setState(() {
-                                        selectedClient = value.toString();
-                                      });
-                                    },
-                                    initialValue: ""),
+                                  onChange: (value) {
+                                    setState(() {
+                                      selectedClient = value.toString();
+                                    });
+                                  },
+                                  onSave: (value) {
+                                    setState(() {
+                                      selectedClient = value.toString();
+                                    });
+                                  },
+                                  initialValue: selectedClient == null
+                                      ? ""
+                                      : selectedClient!,
+                                ),
                                 const SizedBox(
                                   height: 10,
                                 ),
@@ -445,7 +497,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
                           alignment: AlignmentDirectional.topEnd,
                           child: ImageDragged(
                               text: "صورة الماكينة",
-                              url: "",
+                              url: widget.item.imageUrl!,
                               photo: setMachineImage),
                         ),
                         const SizedBox(
@@ -476,9 +528,6 @@ class _AddMachineFormState extends State<AddMachineForm> {
                         ),
                         noIconedTextField('الماركة', _brandTextController,
                             onTextChange: (value) {}),
-                        const SizedBox(
-                          height: 10,
-                        ),
                         kIsWeb
                             ? Row(
                                 mainAxisAlignment:
@@ -526,11 +575,6 @@ class _AddMachineFormState extends State<AddMachineForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          kIsWeb
-              ? const Header(
-                  isMain: false,
-                )
-              : SizedBox(),
           SubHeader(
             isActive: isActive,
             Submit: Submit,
@@ -559,9 +603,8 @@ class _AddMachineFormState extends State<AddMachineForm> {
                             children: content,
                           )
                         : Column(
-                            verticalDirection: VerticalDirection.up,
                             children: content,
-                          ),
+                            verticalDirection: VerticalDirection.up),
                   ],
                 ),
               ),
@@ -598,7 +641,7 @@ class _SubHeaderState extends State<SubHeader> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Text(
-                'اضافة منتج',
+                'تعديل منتج',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   color: Colors.white,
@@ -611,7 +654,7 @@ class _SubHeaderState extends State<SubHeader> {
                 icon: const Icon(
                   PhosphorIcons.arrow_right,
                   color: Colors.white,
-                  size: 24,
+                  size: kIsWeb ? 24 : 18,
                 ),
                 tooltip: 'عودة',
                 onPressed: () {
@@ -624,7 +667,7 @@ class _SubHeaderState extends State<SubHeader> {
             bottom: 0,
             left: 0,
             child: subHeaderNoIconButton(
-                'اضافة',
+                'حفظ',
                 widget.isActive
                     ? () {
                         widget.Submit();

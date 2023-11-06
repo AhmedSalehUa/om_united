@@ -6,12 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:om_united/Components/PasswordTextField.dart';
 import 'package:om_united/Components/Widgets.dart';
-import 'package:om_united/Pages/HomePage.dart';
+import 'package:om_united/Pages/Home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:om_united/Model/User.dart' as Local;
-import '../Pages/MainFragmnet.dart';
+import '../Fragments/MobileFragment.dart';
+import '../Fragments/WebFragment.dart';
 import '../utilis/Utilis.dart';
 
 class LoginForm extends StatefulWidget {
@@ -141,15 +142,7 @@ class _LoginFormState extends State<LoginForm> {
                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => kIsWeb
-                                    ? Scaffold(
-                                  body: HomePage(),
-                                ): MainFragmnet(
-                                  subHeader: SizedBox(),
-                                  content: SizedBox(),
-                                  isMainWidget: false,
-                                  user: user,
-                                ))
+                                builder: (context) => kIsWeb ? WebFragment(): MobileFragment() )
                         );
                       }
                     } else {

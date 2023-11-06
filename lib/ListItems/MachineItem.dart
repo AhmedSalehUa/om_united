@@ -32,19 +32,24 @@ class _MachineItemsState extends State<MachineItems> {
       children: [
         Stack(
           children: [
-            Container(
-              width: 180,
-              height: kIsWeb?140: 100,
-              decoration: ShapeDecoration(
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(width: 0.50, color: Color(0xFFD0D5DD)),
-                  borderRadius: BorderRadius.circular(10),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: kIsWeb?140: 100,
+                    decoration: ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(width: 0.50, color: Color(0xFFD0D5DD)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.imageUrl,
+                      fit: BoxFit.fill,
+                    )  ,
+                  ),
                 ),
-              ),
-              child: CachedNetworkImage(
-                imageUrl: widget.imageUrl,
-                fit: BoxFit.fill,
-              )  ,
+              ],
             ),
             Align(
               alignment: AlignmentDirectional.topEnd,
