@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_phosphor_icons/flutter_phosphor_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../Model/Rent.dart';
+import '../Pages/AssetsDetails.dart';
 import '../utilis/Utilis.dart';
 
 class ClientRentItem extends StatefulWidget {
@@ -46,30 +47,57 @@ class _ClientRentItemState extends State<ClientRentItem> {
                 ),
               ),
               child: GestureDetector(
-                onTap: ()   {
+                onTap: () {
                   print(e.photo);
-                    LAUNCH_URL(e.photo.replaceAll(" ","%20"));
-
+                  LAUNCH_URL(e.photo.replaceAll(" ", "%20"));
                 },
-                child: e.photo.contains("mp4")? DottedBorder(
-                  child: Container(
-                    width: 300,
-                    height: 300,
-                    child: Center(
-                      child: Text("Video"),
-                    ),
-                  ),
-                ):CachedNetworkImage(
-                  imageUrl:  e.photo,
+                child: e.photo.contains("mp4")
+                    ? DottedBorder(
+                        child: Container(
+                          width: 300,
+                          height: 300,
+                          child: Center(
+                            child: Text("Video"),
+                          ),
+                        ),
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: e.photo,
+                        fit: BoxFit.fill,
+                      ),
+              ),
+            ))
+        .toList();
+    List<Widget> assets = widget.rent.assets!
+        .map((e) => Container(
+              width: 64,
+              height: 64,
+              decoration: ShapeDecoration(
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(width: 2, color: Color(0x14344054)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: GestureDetector(
+                onTap: () async {
+                  final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AssetsDetails(
+                                item: e,
+                              )));
+                },
+                child: CachedNetworkImage(
+                  imageUrl: e.image,
                   fit: BoxFit.fill,
                 ),
               ),
             ))
         .toList();
     List<Widget> content = [
-      SingleChildScrollView(scrollDirection: Axis.horizontal,
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
         child: Container(
-
           decoration: ShapeDecoration(
             shape: RoundedRectangleBorder(
               side: const BorderSide(width: 0.50, color: Color(0x14344054)),
@@ -120,17 +148,18 @@ class _ClientRentItemState extends State<ClientRentItem> {
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.50,
                 ),
-              ),Text(
-              widget.rent.date,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                color: Color(0xFF98A1B2),
-                fontSize: 11,
-                fontFamily: 'sonto',
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.50,
               ),
-            ),
+              Text(
+                widget.rent.date,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  color: Color(0xFF98A1B2),
+                  fontSize: 11,
+                  fontFamily: 'sonto',
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.50,
+                ),
+              ),
               Text(
                 "تاريخ الايجار من : ",
                 textAlign: TextAlign.right,
@@ -142,7 +171,6 @@ class _ClientRentItemState extends State<ClientRentItem> {
                   letterSpacing: 0.50,
                 ),
               ),
-
             ],
           ),
           Row(
@@ -246,7 +274,7 @@ class _ClientRentItemState extends State<ClientRentItem> {
           Directionality(
             textDirection: TextDirection.rtl,
             child: Text(
-              'قيمة الايجار  : ${widget.rent.cost!=null?widget.rent.cost!:"0"}',
+              'قيمة الايجار  : ${widget.rent.cost != null ? widget.rent.cost! : "0"}',
               textAlign: TextAlign.right,
               style: const TextStyle(
                 color: Color(0xFF475467),
@@ -260,7 +288,7 @@ class _ClientRentItemState extends State<ClientRentItem> {
           Directionality(
             textDirection: TextDirection.rtl,
             child: Text(
-             'ملاحظات : ${widget.rent.notes!}',
+              'ملاحظات : ${widget.rent.notes!}',
               textAlign: TextAlign.right,
               style: const TextStyle(
                 color: Color(0xFF475467),
@@ -282,12 +310,37 @@ class _ClientRentItemState extends State<ClientRentItem> {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      child:Wrap(children: [ kIsWeb
-          ? Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: content,
-      )
-          : Column(children: content, verticalDirection: VerticalDirection.up)]),
+      child: Wrap(children: [
+        Column(children: [
+          kIsWeb
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: content,
+                )
+              : Column(
+                  children: content, verticalDirection: VerticalDirection.up),
+          Column(
+            children: [
+              assets.length > 0
+                  ? Text(
+                      "الملحقات",
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: Color(0xFF1A1A24),
+                        fontSize: 14,
+                        fontFamily: 'sonto',
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.10,
+                      ),
+                    )
+                  : SizedBox(),
+              Row(
+                children: assets,
+              ),
+            ],
+          )
+        ])
+      ]),
     );
   }
 }

@@ -227,7 +227,7 @@ class _AddAssetFormState extends State<AddAssetForm> {
                         ), const SizedBox(
                           height: 10,
                         ),
-                        splittedTextField('قـيـمـــة الاصـــــــل',
+                        splittedTextField(kIsWeb ? 'قـيـمـــة الاصـــــــل':"قيمة الاصل",
                             _valueTextController, 'ريال',
                             height: 40),
 

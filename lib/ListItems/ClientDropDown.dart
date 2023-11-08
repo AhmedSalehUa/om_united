@@ -57,6 +57,7 @@ class _DropDownState extends State<DropDown> {
   late Future<List<ClientsModel>> _futureItems;
 
   String? selectedValue;
+  final TextEditingController textEditingController = TextEditingController();
 
   Future<List<ClientsModel>> fetchData() async {
     try {
@@ -76,7 +77,7 @@ class _DropDownState extends State<DropDown> {
       }
       return items;
     } catch (e) {
-       print("excep ${e}");
+      print("excep ${e}");
       throw Exception('Failed to fetch data: $e');
     }
   }
@@ -115,6 +116,41 @@ class _DropDownState extends State<DropDown> {
                         ),
                         color: const Color.fromRGBO(249, 250, 251, 1),
                       ),
+                    ),
+                    dropdownSearchData: DropdownSearchData(
+                      searchController: textEditingController,
+                      searchInnerWidgetHeight: 50,
+                      searchInnerWidget: Container(
+                        height: 50,
+                        padding: const EdgeInsets.only(
+                          top: 8,
+                          bottom: 4,
+                          right: 8,
+                          left: 8,
+                        ),
+                        child: TextFormField(
+                          expands: true,
+                          maxLines: null,
+                          controller: textEditingController,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            hintText: 'Search for an item...',
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      searchMatchFn: (item, searchValue) {
+                        Align a =  item.child as Align;
+                        Text b =  a.child as Text;
+                        return b.data!.contains(searchValue);
+                      },
                     ),
                     decoration: const InputDecoration(
                       enabledBorder: OutlineInputBorder(
@@ -213,7 +249,9 @@ class _DropDownState extends State<DropDown> {
                     0.9; // set the height to 90% of the screen height
                 return Container(
                   height: desiredHeight,
-                  child: AddClient(id: "",),
+                  child: AddClient(
+                    id: "",
+                  ),
                 );
               },
             ).then((value) => setState(() {

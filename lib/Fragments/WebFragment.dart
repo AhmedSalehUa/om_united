@@ -5,6 +5,7 @@ import 'package:popover/popover.dart';
 import '../Authentications/Login.dart';
 import '../Components/MiniHeader.dart';
 import '../Components/Widgets.dart';
+import '../FormPages/AddMachine.dart';
 import '../Pages/AssetsManagment.dart';
 import '../Pages/ClientMachines.dart';
 import '../Pages/Home.dart';
@@ -63,11 +64,13 @@ class _WebFragmentState extends State<WebFragment> {
     getRole().then((value) => setState(() {
           role = value;
         }));
+
   }
 
   @override
   Widget build(BuildContext context) {
     List content = [Home(), Inventory(), AssetsManagment(), ClientMachines()];
+    // return AddMachine() ;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(

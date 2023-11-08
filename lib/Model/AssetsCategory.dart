@@ -24,4 +24,13 @@ class AssetsCategory {
         count: json['count'] ,
         value: json['value'] );
   }
+  factory AssetsCategory.fromString() {
+    return AssetsCategory(
+        id: 4,
+        name: "test",
+        image: "",
+        forRent: "true" ,
+        count: "10" ,
+        value: "100" );
+  }
 }

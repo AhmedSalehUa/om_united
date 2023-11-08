@@ -414,6 +414,40 @@ Directionality listFilter(
   );
 }
 
+Wrap CatFilter(
+    String text, IconData icon, Function onTap, bool isActive) {
+  return Wrap(
+    children: [
+      TextButton.icon(
+        onPressed: () => {onTap()},
+        icon: Icon(
+          icon,
+          size: 24,
+          color: isActive ? Colors.white: const Color(0xFF068AC8),
+        ),
+        label: Text(
+          text,
+          softWrap: false,
+          style: TextStyle(
+            color: isActive ?  Colors.white : const Color(0xFF068AC8),
+            fontSize: 14,
+            fontFamily: 'santo',
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.10,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isActive ?  Colors.green : const Color(0xFFCDE6F4),
+          padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(50),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 Align getStatusMenu(
     Function onChange, Function onSaved, String? selectedValue) {
   const List<String> list = <String>['1', '2', '3'];

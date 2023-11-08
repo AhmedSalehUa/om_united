@@ -52,6 +52,8 @@ class Details extends StatefulWidget {
 }
 
 class _DetailsState extends State<Details> {
+  String returnValue = "";
+
   Future<void> Delete() async {
     var request = http.MultipartRequest(
       "POST",
@@ -80,11 +82,11 @@ class _DetailsState extends State<Details> {
           MaterialPageRoute(
             builder: (context) => kIsWeb
                 ? WebFragment(
-              selectedIndex: 1,
-            )
+                    selectedIndex: 1,
+                  )
                 : MobileFragment(
-              selectedIndex: 1,
-            ),
+                    selectedIndex: 1,
+                  ),
           ),
         );
         Fluttertoast.showToast(
@@ -101,6 +103,20 @@ class _DetailsState extends State<Details> {
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
+    }
+  }
+
+  editMachine() async {
+    final result =await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => EditMachine(
+                  item: widget.item,
+                  rent: widget.item.rent,
+                )));
+
+    if (result == "done") {
+      Navigator.pop(context, "done");
     }
   }
 
@@ -140,8 +156,11 @@ class _DetailsState extends State<Details> {
               Align(
                 alignment: AlignmentDirectional.topEnd,
                 child: Text(
-                  widget.item.brand == null ? "الماركة" : " الماركة : "+ widget.item.brand!,
-                  textAlign: TextAlign.right,textDirection: TextDirection.rtl,
+                  widget.item.brand == null
+                      ? "الماركة"
+                      : " الماركة : " + widget.item.brand!,
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
                   style: const TextStyle(
                     color: Color(0xFF475467),
                     fontSize: 14,
@@ -157,8 +176,11 @@ class _DetailsState extends State<Details> {
               Align(
                 alignment: AlignmentDirectional.topEnd,
                 child: Text(
-                  widget.item.code == null ? "الرقم التعريفي" :   " الرقم التعريفي : "+widget.item.code!,
-                  textAlign: TextAlign.right,textDirection: TextDirection.rtl,
+                  widget.item.code == null
+                      ? "الرقم التعريفي"
+                      : " الرقم التعريفي : " + widget.item.code!,
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
                   style: const TextStyle(
                     color: Color(0xFF475467),
                     fontSize: 14,
@@ -187,29 +209,36 @@ class _DetailsState extends State<Details> {
                     state: widget.item.status,
                   ),
                 ),
-              ), const SizedBox(
+              ),
+              const SizedBox(
                 height: 15,
               ),
               Align(
                 alignment: AlignmentDirectional.topEnd,
                 child: Container(
                   width: 230,
-                  decoration: ShapeDecoration(color: Color(0xFF475467),
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF475467),
                     shape: RoundedRectangleBorder(
                       side:
-                      const BorderSide(width: 2, color: Color(0x14344054)),
+                          const BorderSide(width: 2, color: Color(0x14344054)),
                       borderRadius: BorderRadius.circular(21),
                     ),
                   ),
                   padding: EdgeInsets.all(15),
-                  child: Text( "اجمالي تكلفة الصيانة : " + widget.item.total_maintance_cost.toString() , textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl, style: const TextStyle(
+                  child: Text(
+                    "اجمالي تكلفة الصيانة : " +
+                        widget.item.total_maintance_cost.toString(),
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontFamily: 'santo',
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.10,
-                    ),),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(
@@ -219,22 +248,29 @@ class _DetailsState extends State<Details> {
                 alignment: AlignmentDirectional.topEnd,
                 child: Container(
                   width: 230,
-                  decoration: ShapeDecoration(color: Color(0xFF475467),
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF475467),
                     shape: RoundedRectangleBorder(
                       side:
-                      const BorderSide(width: 2, color: Color(0x14344054)),
+                          const BorderSide(width: 2, color: Color(0x14344054)),
                       borderRadius: BorderRadius.circular(21),
                     ),
                   ),
                   padding: EdgeInsets.all(15),
-                  child: Text( "قيمة المولد : " + widget.item.machine_value.toString() + " ريال " , textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl, style: const TextStyle(
-                      color:Colors.white,
+                  child: Text(
+                    "قيمة المولد : " +
+                        widget.item.machine_value.toString() +
+                        " ريال ",
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 14,
                       fontFamily: 'santo',
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.10,
-                    ),),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(
@@ -254,8 +290,8 @@ class _DetailsState extends State<Details> {
                   : const SizedBox(
                       height: 10,
                     ),
-              getMachineStatus(
-                  widget.item.lastMaintaince!, widget.item.maintainceEvery, widget.item.status),
+              getMachineStatus(widget.item.lastMaintaince!,
+                  widget.item.maintainceEvery, widget.item.status),
             ],
           ),
         ),
@@ -266,8 +302,10 @@ class _DetailsState extends State<Details> {
       Expanded(
         flex: kIsWeb ? 1 : 0,
         child: Stack(
-          children: [ Container(
-              height: 380,width: MediaQuery.of(context).size.width,
+          children: [
+            Container(
+              height: 380,
+              width: MediaQuery.of(context).size.width,
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(width: 0.50, color: Color(0xFFD0D5DD)),
@@ -313,6 +351,7 @@ class _DetailsState extends State<Details> {
       children: [
         SubHeader(
           item: widget.item,
+          Edit: editMachine,
           Delete: Delete,
         ),
         Expanded(
@@ -357,22 +396,24 @@ class _DetailsState extends State<Details> {
                                       children: detailsContent,
                                     ),
                             ),
-                            mainainces.length>0 ?const Align(
-                              alignment: AlignmentDirectional.topEnd,
-                              child: Text(
-                                'تاريخ الصيانة',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  color: Color(0xFF1A1A24),
-                                  fontSize: 16,
-                                  fontFamily: 'santo',
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.15,
-                                ),
-                              ),
-                            ):SizedBox(),
+                            mainainces.length > 0
+                                ? const Align(
+                                    alignment: AlignmentDirectional.topEnd,
+                                    child: Text(
+                                      'تاريخ الصيانة',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                        color: Color(0xFF1A1A24),
+                                        fontSize: 16,
+                                        fontFamily: 'santo',
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.15,
+                                      ),
+                                    ),
+                                  )
+                                : SizedBox(),
                             Expanded(
-                              flex: kIsWeb?1:0,
+                              flex: kIsWeb ? 1 : 0,
                               child: Column(
                                 children: mainainces,
                               ),
@@ -394,9 +435,11 @@ class _DetailsState extends State<Details> {
 
 class SubHeader extends StatefulWidget {
   final Function Delete;
+  final Function Edit;
   final Machine item;
 
-  const SubHeader({Key? key, required this.Delete, required this.item})
+  const SubHeader(
+      {Key? key, required this.Delete, required this.Edit, required this.item})
       : super(key: key);
 
   @override
@@ -447,13 +490,7 @@ class _SubHeaderState extends State<SubHeader> {
                   kIsWeb ? 'تعديل المنتج' : '',
                   PhosphorIcons.pencil_simple,
                   () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => EditMachine(
-                                  item: widget.item,
-                                  rent: widget.item.rent,
-                                )));
+                    widget.Edit();
                   },
                   color: const Color.fromRGBO(205, 230, 244, 1),
                 ),
@@ -478,14 +515,13 @@ class _SubHeaderState extends State<SubHeader> {
                               MaterialPageRoute(
                                 builder: (context) => kIsWeb
                                     ? WebFragment(
-                                  selectedIndex: 1,
-                                )
+                                        selectedIndex: 1,
+                                      )
                                     : MobileFragment(
-                                  selectedIndex: 1,
-                                ),
+                                        selectedIndex: 1,
+                                      ),
                               ),
                             );
-
                           },
                         );
                       },

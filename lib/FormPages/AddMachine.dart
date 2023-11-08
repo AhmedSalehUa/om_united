@@ -10,6 +10,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:om_united/Components/DatePicker.dart';
 import 'package:om_united/Components/ImageDragged.dart';
 import 'package:om_united/Components/Widgets.dart';
+import 'package:om_united/ListItems/AssetsMultiListItem.dart';
 import 'package:om_united/ListItems/MachineCategoryItem.dart';
 import 'package:om_united/FormPages/AddMachineCategory.dart';
 import 'package:om_united/Pages/Inventory.dart';
@@ -19,11 +20,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/MultipleImageDragged.dart';
 import '../Fragments/MobileFragment.dart';
 import '../Fragments/WebFragment.dart';
+import '../ListItems/AssetsListItem.dart';
 import '../ListItems/ClientDropDown.dart';
+import '../Model/Assets.dart';
+import '../Model/AssetsCategory.dart';
 import '../Model/MachineCategories.dart';
+import '../Pages/AssetCategoryItems.dart';
 import 'AddClientTemp.dart';
 import '../Fragments/MiniFragmnet.dart';
 import 'package:http/http.dart' as http;
+
+import 'AssetsSelection.dart';
 
 class AddMachine extends StatefulWidget {
   const AddMachine({Key? key}) : super(key: key);
@@ -101,6 +108,8 @@ class _AddMachineFormState extends State<AddMachineForm> {
     super.initState();
   }
 
+  List<Assets> RentAssets = [];
+  List<int> RentAssetsIDS = [];
   @override
   Widget build(BuildContext context) {
     List<Widget> catRow = [
@@ -216,6 +225,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
             "rent_notes": _notesTextController.text,
             "rent_cost": _costTextController.text,
             "rent_client_id": selectedClient == null ? "1" : selectedClient!,
+            "rent_assets":"["+RentAssetsIDS.join(',')+"]"
           });
         } else {
           request.fields.addAll({
@@ -229,7 +239,6 @@ class _AddMachineFormState extends State<AddMachineForm> {
             "total_maintance_cost": _totalMaintanceCostTextController.text,
           });
         }
-
         var response = await request.send();
 
         if (response.statusCode == 200) {
@@ -260,11 +269,11 @@ class _AddMachineFormState extends State<AddMachineForm> {
                 MaterialPageRoute(
                   builder: (context) => kIsWeb
                       ? WebFragment(
-                    selectedIndex: 1,
-                  )
+                          selectedIndex: 1,
+                        )
                       : MobileFragment(
-                    selectedIndex: 1,
-                  ),
+                          selectedIndex: 1,
+                        ),
                 ),
               );
               Fluttertoast.showToast(
@@ -295,110 +304,245 @@ class _AddMachineFormState extends State<AddMachineForm> {
     }
 
     List<Widget> content = [
-      Expanded(
-        flex: kIsWeb ? 1 : 0,
-        child: Container(
-          decoration: ShapeDecoration(
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              side: const BorderSide(width: 0.50, color: Color(0x14344054)),
-              borderRadius: BorderRadius.circular(21),
-            ),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Align(
-                alignment: AlignmentDirectional.topEnd,
-                child: Text(
-                  "الحالة",
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: Color(0xFF1A1A24),
-                    fontSize: 16,
-                    fontFamily: 'santo',
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.15,
-                  ),
-                ),
-              ),
-              getStatusMenu((value) {
-                setState(() {
-                  selectedValue = value.toString();
-                });
-              }, (value) {
-                setState(() {
-                  selectedValue = value.toString();
-                });
-              }, selectedValue),
-              selectedValue != "3"
-                  ? Text("")
-                  : Column(
+      selectedValue != "3"
+          ? SizedBox()
+          : Expanded(
+              flex: kIsWeb ? 1 : 0,
+              child: Wrap(
+                children: [
+                  Container(
+                    decoration: ShapeDecoration(
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        side:
+                            const BorderSide(width: 0.50, color: Color(0x14344054)),
+                        borderRadius: BorderRadius.circular(21),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
                       children: [
-                        Align(
+                        const Align(
                           alignment: AlignmentDirectional.topEnd,
-                          child: SizedBox(
-                            child: Column(
-                              children: [
-                                Align(
-                                  alignment: AlignmentDirectional.center,
-                                  child: MultipleImageDragged(
-                                    text: 'صور أو فيديو',
-                                    url: [],
-                                    photos: setContractImage,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                ClientDropDown(
-                                    onChange: (value) {
-                                      setState(() {
-                                        selectedClient = value.toString();
-                                      });
-                                    },
-                                    onSave: (value) {
-                                      setState(() {
-                                        selectedClient = value.toString();
-                                      });
-                                    },
-                                    initialValue: ""),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                DatePicker(
-                                    label: "تاريخ التأجير",
-                                    controller: _dateOfContractTextController),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                DatePicker(
-                                    label: "تاريخ الانتهاء",
-                                    controller: _dateRangTextController),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                noIconedTextField(
-                                  'قيمة الايجار',
-                                  _costTextController,
-                                  onTextChange: (value) {},
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                noIconedTextArea(
-                                  'ملاحظات',
-                                  _notesTextController,
-                                  onTextChange: (value) {},
-                                ),
-                              ],
+                          child: Text(
+                            "الملحقات",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: Color(0xFF1A1A24),
+                              fontSize: 16,
+                              fontFamily: 'santo',
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.15,
                             ),
                           ),
                         ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.topEnd,
+                          child: subHeaderButton(
+                            kIsWeb ? RentAssets.length>0?"تعديل": "اضافة" : '',
+                            RentAssets.length>0? PhosphorIcons.pencil_simple: PhosphorIcons.plus_circle,
+                            () {
+                              showModalBottomSheet<Map>(
+                                context: context,
+                                elevation: 2,
+                                isScrollControlled: true,
+                                shape: const RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      width: 0.50, color: Color(0x14344054)),
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(21),
+                                      topLeft: Radius.circular(21)),
+                                ),
+                                builder: (BuildContext context) {
+                                  final screenHeight =
+                                      MediaQuery.of(context).size.height;
+                                  final desiredHeight = screenHeight *
+                                      0.9; // set the height to 90% of the screen height
+                                  return Container(
+                                    height: desiredHeight,
+                                    child: AssetsSelection(list :RentAssets),
+                                  );
+                                },
+                              ).then((value) {
+                                if (value != null) {
+                                  List<int> selected = value["selected"];
+                                  List<Assets> assets =   value["assets"];
+                                  List<Assets> returnList = [];
+                                  List<int> returnListIDS = [];
+                                  assets.forEach((e) {
+                                    Assets asset = e;
+                                    bool found = false;
+                                    selected.forEach((m) {
+                                      if (m == e.id) {
+                                        found = true;
+                                      }
+                                    });
+                                    if (found) {
+                                      returnList.add(asset);
+                                      returnListIDS.add(asset.id);
+                                    }
+                                  });
+                                  setState(() {
+                                    RentAssets = returnList;
+                                    RentAssetsIDS = returnListIDS;
+                                  });
+                                }
+                              });
+                            },
+                            color: const Color.fromRGBO(205, 230, 244, 1),
+                          ),
+                        ),
+                        RentAssets.length > 0
+                            ? SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: RentAssets.length * 100,
+                                child: GridView.builder(  
+                                  physics:ScrollPhysics(),
+                                  itemCount: RentAssets.length,
+                                  cacheExtent: 9999,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    mainAxisExtent: 20,
+                                    crossAxisCount: 2   ,mainAxisSpacing: 150,
+                                    crossAxisSpacing: 10,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    final item = RentAssets[index];
+                                    return GestureDetector(
+                                      onTap: () async {},
+                                      child: AssetsMultiListItem(
+                                        item: item,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                            : SizedBox()
                       ],
                     ),
-            ],
-          ),
+                  ),
+                ],
+              ),
+            ),
+      kIsWeb
+          ? const SizedBox(
+              width: 24,
+            )
+          : const SizedBox(
+              height: 24,
+            ),
+      Expanded(
+        flex: kIsWeb ? 1 : 0,
+        child: Column(
+          children: [
+            Container(
+              decoration: ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(width: 0.50, color: Color(0x14344054)),
+                  borderRadius: BorderRadius.circular(21),
+                ),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  const Align(
+                    alignment: AlignmentDirectional.topEnd,
+                    child: Text(
+                      "الحالة",
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: Color(0xFF1A1A24),
+                        fontSize: 16,
+                        fontFamily: 'santo',
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.15,
+                      ),
+                    ),
+                  ),
+                  getStatusMenu((value) {
+                    setState(() {
+                      selectedValue = value.toString();
+                    });
+                  }, (value) {
+                    setState(() {
+                      selectedValue = value.toString();
+                    });
+                  }, selectedValue),
+                  selectedValue != "3"
+                      ? Text("")
+                      : Column(
+                          children: [
+                            Align(
+                              alignment: AlignmentDirectional.topEnd,
+                              child: SizedBox(
+                                child: Column(
+                                  children: [
+                                    Align(
+                                      alignment: AlignmentDirectional.center,
+                                      child: MultipleImageDragged(
+                                        text: 'صور أو فيديو',
+                                        url: [],
+                                        photos: setContractImage,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    ClientDropDown(
+                                        onChange: (value) {
+                                          setState(() {
+                                            selectedClient = value.toString();
+                                          });
+                                        },
+                                        onSave: (value) {
+                                          setState(() {
+                                            selectedClient = value.toString();
+                                          });
+                                        },
+                                        initialValue: ""),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    DatePicker(
+                                        label: "تاريخ التأجير",
+                                        controller:
+                                            _dateOfContractTextController),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    DatePicker(
+                                        label: "تاريخ الانتهاء",
+                                        controller: _dateRangTextController),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    noIconedTextField(
+                                      'قيمة الايجار',
+                                      _costTextController,
+                                      onTextChange: (value) {},
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    noIconedTextArea(
+                                      'ملاحظات',
+                                      _notesTextController,
+                                      onTextChange: (value) {},
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
       kIsWeb
@@ -409,7 +553,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
               height: 24,
             ),
       Expanded(
-        flex: kIsWeb ? 3 : 0,
+        flex: kIsWeb ? selectedValue != "3"?3:2 : 0,
         child: Container(
           decoration: ShapeDecoration(
             color: Colors.white,
@@ -512,7 +656,7 @@ class _AddMachineFormState extends State<AddMachineForm> {
                         const SizedBox(
                           height: 10,
                         ),
-                        splittedTextField('قـيـمـــة الـمــولــــد',
+                        splittedTextField(kIsWeb ? 'قـيـمـــة الـمــولــــد' :"قيمة المولد",
                             _macineValueTextController, 'ريال',
                             height: 40),
                       ],

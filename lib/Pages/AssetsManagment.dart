@@ -158,7 +158,7 @@ class _ContentState extends State<Content> {
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         mainAxisExtent: kIsWeb ? 200 : 170,
                         crossAxisCount: kIsWeb ? 4 : 2,
-                        crossAxisSpacing: kIsWeb ? 190 : 120,
+                        crossAxisSpacing: kIsWeb ? 190 : 20,
                       ),
                       itemBuilder: (context, index) {
                         final item = items[index];

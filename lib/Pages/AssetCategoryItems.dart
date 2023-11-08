@@ -31,8 +31,6 @@ class AssetCategoryItems extends StatefulWidget {
 }
 
 class _AssetCategoryItemsState extends State<AssetCategoryItems> {
-
-
   @override
   Widget build(BuildContext context) {
     return MiniFragmnet(
@@ -46,8 +44,7 @@ class _AssetCategoryItemsState extends State<AssetCategoryItems> {
 class Details extends StatefulWidget {
   final AssetsCategory item;
 
-  const Details({Key? key, required this.item })
-      : super(key: key);
+  const Details({Key? key, required this.item}) : super(key: key);
 
   @override
   State<Details> createState() => _DetailsState();
@@ -56,53 +53,13 @@ class Details extends StatefulWidget {
 class _DetailsState extends State<Details> {
   int numOfAssetsCount = 0;
   int amountOfAssetsCount = 0;
+  String filterName = "";
 
   void setCount(numOfAssets, amountOfAssets) {
     setState(() {
       numOfAssetsCount = numOfAssets;
       amountOfAssetsCount = amountOfAssets;
     });
-  }
-  Future<void> Delete() async {
-    var request = http.MultipartRequest(
-      "POST",
-      Uri.parse("${URL_PROVIDER()}/Machines.php"),
-    );
-    request.fields.addAll({
-      "id": widget.item.id.toString(),
-      "delete": "true",
-    });
-
-    var response = await request.send();
-
-    if (response.statusCode == 200) {
-      var res = json.decode(await response.stream.bytesToString());
-      if (res["error"]) {
-        Fluttertoast.showToast(
-            msg: res["message"],
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.TOP_RIGHT,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
-      } else {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const Inventory()));
-        Fluttertoast.showToast(
-            msg: res["message"],
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.TOP_RIGHT,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
-      }
-    } else {
-      Fluttertoast.showToast(
-        msg: "NetworkError",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
-    }
   }
 
   late Future<List<Assets>> _futureItems;
@@ -119,11 +76,17 @@ class _DetailsState extends State<Details> {
           });
       final jsonData = jsonDecode(response.body);
       var statics = jsonData["statics"];
-      setCount(int.parse(statics[0]["count"]),int.parse(statics[0]["value"]));
+      setCount(int.parse(statics[0]["count"]), int.parse(statics[0]["value"]));
       final List<Assets> items = [];
       for (var itemJson in jsonData["data"]) {
         final item = Assets.fromJson(itemJson);
-        items.add(item);
+        if (filterName != "") {
+          if( item.name.contains(filterName) || item.code.contains(filterName) ){
+            items.add(item);
+          }
+        } else {
+          items.add(item);
+        }
       }
 
       return items;
@@ -137,6 +100,13 @@ class _DetailsState extends State<Details> {
   void initState() {
     super.initState();
     _futureItems = fetchData();
+  }
+
+  void searchSubmit(String text) async {
+    setState(() {
+      filterName = text;
+      _futureItems = fetchData();
+    });
   }
 
   void addAssets() async {
@@ -160,6 +130,7 @@ class _DetailsState extends State<Details> {
         SubHeader(
           item: widget.item,
           addAssets: addAssets,
+          searchSubmit: searchSubmit,
           amountOfAssets: amountOfAssetsCount,
           numOfAssets: numOfAssetsCount,
         ),
@@ -269,13 +240,15 @@ class SubHeader extends StatefulWidget {
   final Function() addAssets;
   final int numOfAssets;
   final int amountOfAssets;
+  final void Function(String text) searchSubmit;
 
   const SubHeader(
       {Key? key,
       required this.item,
       required this.addAssets,
       required this.amountOfAssets,
-      required this.numOfAssets})
+      required this.numOfAssets,
+      required this.searchSubmit})
       : super(key: key);
 
   @override
@@ -293,10 +266,71 @@ class _SubHeaderState extends State<SubHeader> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          subHeaderButton(kIsWeb ? 'اضافة اصل' : '', PhosphorIcons.plus_circle,
-              () {
+          subHeaderButton(
+              kIsWeb ? 'اضافة اصل' : '', PhosphorIcons.plus_circle, () {
             widget.addAssets();
           }),
+         kIsWeb? Container(
+            width: 254,
+            height: 36,
+            decoration: ShapeDecoration(
+              color: const Color(0xFF344054),
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(
+                    width: 0.50, color: Color.fromRGBO(52, 64, 84, 1)),
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: TextField(
+                onSubmitted: (a) {
+                  widget.searchSubmit(a);
+                },
+                cursorColor: Colors.white,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  color: Colors.white,
+                  height: 1,
+                ),
+                decoration: InputDecoration(
+                  prefixIcon: IconButton(
+                    icon: const Icon(
+                      PhosphorIcons.magnifying_glass,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    onPressed: () {},
+                  ),
+                  labelText: 'ابحث عن منتجات',
+                  labelStyle: const TextStyle(
+                    color: Color(0xFFE4E7EC),
+                    fontSize: 12,
+                    fontFamily: 'santo',
+                    fontWeight: FontWeight.w400,
+                    height: 16,
+                    letterSpacing: 0.40,
+                  ),
+                  fillColor: const Color.fromRGBO(52, 64, 84, 1),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      width: 0.50,
+                      color: Color.fromRGBO(52, 64, 84, 1),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      width: 0.50,
+                      color: Color.fromRGBO(52, 64, 84, 1),
+                    ),
+                  ),
+                ),
+                keyboardType: TextInputType.text,
+              ),
+            ),
+          ):SizedBox(),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

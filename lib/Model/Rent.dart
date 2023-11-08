@@ -1,3 +1,4 @@
+import 'package:om_united/Model/Assets.dart';
 import 'package:om_united/Model/ClientsModel.dart';
 
 import 'RentsAttachments.dart';
@@ -11,6 +12,7 @@ class Rent {
 
   ClientsModel? client;
   List<RentsAttachments>? attachments;
+  List<Assets>? assets;
 
   Rent({
     required this.id,
@@ -19,6 +21,7 @@ class Rent {
     this.cost,
     this.notes,
     this.client,
+    this.assets,
     this.attachments,
   });
 
@@ -30,12 +33,24 @@ class Rent {
         attachments.add(item);
       }
     }
+    List<Assets> assets = [];
+
+    if (json['Assets'] != false) {
+      for (var itemJson in json['Assets']) {
+        final item = Assets.fromJson(itemJson);
+        assets.add(item);
+      }
+    }
     ClientsModel? client = ClientsModel.fromJson(json['Clients'][0]);
 
     return Rent(
         id: int.parse(json['id']),
-        date: json['date_from'],cost: json['cost'],
-        dateTo: json['date_to'],client: client,notes: json['notes'],
+        date: json['date_from'],
+        cost: json['cost'],
+        dateTo: json['date_to'],
+        client: client,
+        notes: json['notes'],
+        assets: assets,
         attachments: attachments);
   }
 }

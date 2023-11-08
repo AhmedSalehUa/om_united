@@ -59,7 +59,7 @@ class _AssetsListItemState extends State<AssetsListItem> {
                           borderRadius: BorderRadius.circular(4)),
                     ),
                     child: Text(
-                      '#${widget.item.id.toString()}',
+                      '#${widget.item.code.toString()}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,

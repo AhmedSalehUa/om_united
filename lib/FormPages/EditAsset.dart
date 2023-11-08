@@ -237,7 +237,7 @@ class _EditAssetFormState extends State<EditAssetForm> {
                         const SizedBox(
                           height: 10,
                         ),
-                        splittedTextField('قـيـمـــة الاصـــــــل',
+                        splittedTextField(kIsWeb ? 'قـيـمـــة الاصـــــــل':"قيمة الاصل",
                             _valueTextController, 'ريال',
                             height: 40),
                       ],

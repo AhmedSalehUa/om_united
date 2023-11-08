@@ -117,7 +117,9 @@ class _InventoryContent extends State<InventoryContent> {
             'Content-Type': 'application/json',
             'Accept': '*/*'
           });
-      final jsonData = jsonDecode(response.body);
+      final jsonDataBody =  response.body  ;
+      // print(jsonDataBody);
+      final jsonData = jsonDecode(jsonDataBody);
       final List<Machine> items = [];
       final dataJson =   jsonData["statics"] ;
       for (var itemJson in jsonData["data"]) {
@@ -229,13 +231,20 @@ class _InventoryContent extends State<InventoryContent> {
 
                         final item = items[index];
                         return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
+                          onTap: ()async {
+                            final result =await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => MachineDetails(
                                           item: item,
                                         )));
+
+
+                            if (result == "done") {
+                              setState(() {
+                                _futureItems = fetchData();
+                              });
+                            }
                           },
                           child: MachineItems(
                             state: item.status,
